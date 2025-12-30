@@ -76,8 +76,6 @@ target_include_directories(DaktGUI
 target_link_libraries(DaktGUI
     PUBLIC
         DaktCore
-        DaktLogger
-        DaktEvents
 )
 
 target_compile_features(DaktGUI PUBLIC cxx_std_23)
