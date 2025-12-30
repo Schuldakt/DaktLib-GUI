@@ -48,3 +48,19 @@ target_link_libraries(DaktGUI
 target_compile_features(DaktGUI PUBLIC cxx_std_23)
 
 add_library(Dakt::GUI ALIAS DaktGUI)
+
+# ============================================================================
+# Export Configuration
+# ============================================================================
+
+install(TARGETS DaktGUI
+    EXPORT DaktLibTargets
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib
+    RUNTIME DESTINATION bin
+    INCLUDES DESTINATION include
+)
+
+install(DIRECTORY include/
+    DESTINATION include
+)
