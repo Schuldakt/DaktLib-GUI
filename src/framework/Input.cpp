@@ -4,7 +4,7 @@
 // Additional input utilities beyond what's in Context.
 // ============================================================================
 
-#include <dakt/gui/Context.hpp>
+#include <dakt/gui/framework/Context.hpp>
 
 namespace dakt::gui
 {

@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include <dakt/gui/Context.hpp>
-#include <dakt/gui/Theme.hpp>
+#include <dakt/gui/framework/Context.hpp>
+#include <dakt/gui/framework/Theme.hpp>
 
 #include <functional>
 

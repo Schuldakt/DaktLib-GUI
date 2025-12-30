@@ -6,9 +6,9 @@
 
 #pragma once
 
-#include <dakt/gui/DrawList.hpp>
-#include <dakt/gui/Font.hpp>
-#include <dakt/gui/Types.hpp>
+#include <dakt/gui/core/DrawList.hpp>
+#include <dakt/gui/core/Font.hpp>
+#include <dakt/gui/core/Types.hpp>
 
 #include <functional>
 #include <memory>

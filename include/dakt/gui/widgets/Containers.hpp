@@ -8,7 +8,7 @@
 #pragma once
 
 #include <dakt/core/Types.hpp>
-#include <dakt/gui/Types.hpp>
+#include <dakt/gui/core/Types.hpp>
 
 #include <functional>
 

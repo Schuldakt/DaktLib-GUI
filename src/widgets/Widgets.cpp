@@ -2,7 +2,7 @@
 // DaktLib GUI Module - Widgets Implementation
 // ============================================================================
 
-#include <dakt/gui/Widgets.hpp>
+#include <dakt/gui/widgets/Widgets.hpp>
 
 #include <algorithm>
 #include <cstdio>

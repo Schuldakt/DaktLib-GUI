@@ -2,7 +2,7 @@
 // DaktLib GUI Module - Theme Implementation
 // ============================================================================
 
-#include <dakt/gui/Theme.hpp>
+#include <dakt/gui/framework/Theme.hpp>
 
 namespace dakt::gui
 {

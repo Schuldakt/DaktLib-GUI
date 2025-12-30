@@ -7,7 +7,7 @@
 #pragma once
 
 #include <dakt/core/Buffer.hpp>
-#include <dakt/gui/Types.hpp>
+#include <dakt/gui/core/Types.hpp>
 
 #include <functional>
 #include <span>

@@ -6,8 +6,10 @@
 
 #pragma once
 
+#include "DrawList.hpp"
+
 #include <dakt/core/Buffer.hpp>
-#include <dakt/gui/Types.hpp>
+#include <dakt/gui/core/Types.hpp>
 
 #include <memory>
 #include <span>

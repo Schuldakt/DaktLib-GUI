@@ -5,14 +5,14 @@
 // Specialized widgets for data visualization and editing
 // ============================================================================
 
-#include "Context.hpp"
-#include "DrawList.hpp"
-#include "Font.hpp"
-#include "Theme.hpp"
-#include "Types.hpp"
 #include "Widgets.hpp"
 
 #include <dakt/core/Types.hpp>
+#include <dakt/gui/core/DrawList.hpp>
+#include <dakt/gui/core/Font.hpp>
+#include <dakt/gui/core/Types.hpp>
+#include <dakt/gui/framework/Context.hpp>
+#include <dakt/gui/framework/Theme.hpp>
 
 #include <functional>
 #include <span>

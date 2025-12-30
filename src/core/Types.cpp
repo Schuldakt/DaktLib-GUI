@@ -2,7 +2,7 @@
 // DaktLib GUI Module - Types Implementation
 // ============================================================================
 
-#include <dakt/gui/Types.hpp>
+#include <dakt/gui/core/Types.hpp>
 
 #include <cmath>
 #include <numbers>

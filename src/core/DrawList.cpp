@@ -2,7 +2,7 @@
 // DaktLib GUI Module - DrawList Implementation
 // ============================================================================
 
-#include <dakt/gui/DrawList.hpp>
+#include <dakt/gui/core/DrawList.hpp>
 
 #include <algorithm>
 #include <cmath>

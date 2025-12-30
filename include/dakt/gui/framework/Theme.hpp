@@ -6,7 +6,7 @@
 
 #pragma once
 
-#include <dakt/gui/Types.hpp>
+#include <dakt/gui/core/Types.hpp>
 
 #include <memory>
 

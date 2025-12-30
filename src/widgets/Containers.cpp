@@ -2,11 +2,11 @@
 // DaktLib GUI Module - Container Widgets Implementation
 // ============================================================================
 
-#include <dakt/gui/Containers.hpp>
-#include <dakt/gui/Context.hpp>
-#include <dakt/gui/DrawList.hpp>
-#include <dakt/gui/Theme.hpp>
-#include <dakt/gui/Widgets.hpp>
+#include <dakt/gui/core/DrawList.hpp>
+#include <dakt/gui/framework/Context.hpp>
+#include <dakt/gui/framework/Theme.hpp>
+#include <dakt/gui/widgets/Containers.hpp>
+#include <dakt/gui/widgets/Widgets.hpp>
 
 #include <algorithm>
 #include <unordered_map>
