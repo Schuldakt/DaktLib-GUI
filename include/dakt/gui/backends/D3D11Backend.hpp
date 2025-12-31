@@ -95,11 +95,6 @@ public:
     [[nodiscard]] void* getNativeDevice() const override { return m_device; }
     [[nodiscard]] void* getNativeContext() const override { return m_deviceContext; }
 
-    void invalidateDeviceState() override;
-
-    [[nodiscard]] void* getNativeDevice() const override { return m_device; }
-    [[nodiscard]] void* getNativeContext() const override { return m_deviceContext; }
-
     // ========================================================================
     // D3D11-Specific Methods
     // ========================================================================

@@ -2,13 +2,14 @@
 // DaktLib GUI Module - D3D11 Backend Implementation
 // ============================================================================
 
-#include <dakt/gui/D3D11Backend.hpp>
+#include <dakt/gui/backends/D3D11Backend.hpp>
 
 #ifdef _WIN32
     #include <d3d11.h>
     #include <d3dcompiler.h>
 
     #include <cstring>
+    #include <vector>
 
     #pragma comment(lib, "d3d11.lib")
     #pragma comment(lib, "d3dcompiler.lib")
@@ -63,20 +64,31 @@ float4 main(PS_INPUT input) : SV_Target {
 )";
 
 // ============================================================================
-// Global Backend Instance
+// Saved D3D11 State
 // ============================================================================
 
-static D3D11Backend* g_backend = nullptr;
-
-D3D11Backend* getD3D11Backend()
+struct SavedD3D11State
 {
-    return g_backend;
-}
-
-void setD3D11Backend(D3D11Backend* backend)
-{
-    g_backend = backend;
-}
+    ID3D11RasterizerState* rasterizerState = nullptr;
+    ID3D11BlendState* blendState = nullptr;
+    f32 blendFactor[4] = {0};
+    u32 sampleMask = 0;
+    ID3D11DepthStencilState* depthStencilState = nullptr;
+    u32 stencilRef = 0;
+    ID3D11ShaderResourceView* psShaderResource = nullptr;
+    ID3D11SamplerState* psSampler = nullptr;
+    ID3D11PixelShader* pixelShader = nullptr;
+    ID3D11VertexShader* vertexShader = nullptr;
+    ID3D11InputLayout* inputLayout = nullptr;
+    D3D11_PRIMITIVE_TOPOLOGY primitiveTopology = D3D11_PRIMITIVE_TOPOLOGY_UNDEFINED;
+    ID3D11Buffer* vertexBuffer = nullptr;
+    u32 vertexStride = 0;
+    u32 vertexOffset = 0;
+    ID3D11Buffer* indexBuffer = nullptr;
+    DXGI_FORMAT indexFormat = DXGI_FORMAT_UNKNOWN;
+    u32 indexOffset = 0;
+    ID3D11Buffer* vsConstantBuffer = nullptr;
+};
 
 // ============================================================================
 // D3D11Backend Implementation
@@ -89,20 +101,41 @@ D3D11Backend::~D3D11Backend()
     shutdown();
 }
 
-bool D3D11Backend::initialize(const D3D11BackendConfig& config)
+void D3D11Backend::configure(const D3D11BackendConfig& config)
+{
+    m_config = config;
+}
+
+bool D3D11Backend::createDeviceObjects()
+{
+    if (!createShaders())
+        return false;
+    if (!createStates())
+        return false;
+    if (!createBuffers())
+        return false;
+    return true;
+}
+
+void D3D11Backend::destroyDeviceObjects()
+{
+    shutdown();
+}
+
+bool D3D11Backend::initialize()
 {
     if (m_initialized)
     {
         return true;
     }
 
-    if (!config.device || !config.deviceContext)
+    if (!m_config.device || !m_config.deviceContext)
     {
         return false;
     }
 
-    m_device = config.device;
-    m_deviceContext = config.deviceContext;
+    m_device = m_config.device;
+    m_deviceContext = m_config.deviceContext;
 
     // Create shaders
     if (!createShaders())
@@ -112,18 +145,56 @@ bool D3D11Backend::initialize(const D3D11BackendConfig& config)
     }
 
     // Create render states
-    if (!createRenderStates())
+    if (!createStates())
     {
         shutdown();
         return false;
     }
 
     // Create initial buffers
-    if (!createBuffers(config.initialVertexBufferSize, config.initialIndexBufferSize))
+    if (!createBuffers())
     {
         shutdown();
         return false;
     }
+
+    // Create default white texture for solid color rendering
+    {
+        u8 whitePixel[4] = {255, 255, 255, 255};
+        D3D11_TEXTURE2D_DESC texDesc = {};
+        texDesc.Width = 1;
+        texDesc.Height = 1;
+        texDesc.MipLevels = 1;
+        texDesc.ArraySize = 1;
+        texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+        texDesc.SampleDesc.Count = 1;
+        texDesc.Usage = D3D11_USAGE_DEFAULT;
+        texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+
+        D3D11_SUBRESOURCE_DATA initData = {};
+        initData.pSysMem = whitePixel;
+        initData.SysMemPitch = 4;
+
+        ID3D11Texture2D* texture = nullptr;
+        HRESULT hr = m_device->CreateTexture2D(&texDesc, &initData, &texture);
+        if (SUCCEEDED(hr))
+        {
+            D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+            srvDesc.Format = texDesc.Format;
+            srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+            srvDesc.Texture2D.MipLevels = 1;
+
+            m_device->CreateShaderResourceView(texture, &srvDesc, &m_fontTextureView);
+            texture->Release();
+        }
+    }
+
+    // Setup capabilities
+    m_capabilities.maxTextureSize = 16384;
+    m_capabilities.maxTextures = 128;
+    m_capabilities.maxVerticesPerBatch = 65536;
+    m_capabilities.maxIndicesPerBatch = 65536 * 3;
+    m_capabilities.supportsMSAA = true;
 
     m_initialized = true;
     return true;
@@ -131,10 +202,10 @@ bool D3D11Backend::initialize(const D3D11BackendConfig& config)
 
 void D3D11Backend::shutdown()
 {
-    if (m_fontTextureId != 0)
+    if (m_fontTextureView)
     {
-        destroyTexture(m_fontTextureId);
-        m_fontTextureId = 0;
+        m_fontTextureView->Release();
+        m_fontTextureView = nullptr;
     }
 
     if (m_samplerState)
@@ -276,7 +347,7 @@ bool D3D11Backend::createShaders()
     return SUCCEEDED(hr);
 }
 
-bool D3D11Backend::createRenderStates()
+bool D3D11Backend::createStates()
 {
     HRESULT hr;
 
@@ -333,18 +404,27 @@ bool D3D11Backend::createRenderStates()
     return true;
 }
 
-bool D3D11Backend::createBuffers(u32 vertexCount, u32 indexCount)
+bool D3D11Backend::createBuffers()
 {
-    return resizeVertexBuffer(vertexCount) && resizeIndexBuffer(indexCount);
+    ensureVertexBufferSize(m_config.initialVertexBufferSize);
+    ensureIndexBufferSize(m_config.initialIndexBufferSize);
+    return m_vertexBuffer != nullptr && m_indexBuffer != nullptr;
 }
 
-bool D3D11Backend::resizeVertexBuffer(u32 newSize)
+void D3D11Backend::ensureVertexBufferSize(u32 requiredSize)
 {
+    if (m_vertexBufferSize >= requiredSize)
+        return;
+
     if (m_vertexBuffer)
     {
         m_vertexBuffer->Release();
         m_vertexBuffer = nullptr;
     }
+
+    u32 newSize = std::max(requiredSize, m_vertexBufferSize * 2);
+    if (newSize < 5000)
+        newSize = 5000;
 
     D3D11_BUFFER_DESC bufferDesc = {};
     bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -352,21 +432,26 @@ bool D3D11Backend::resizeVertexBuffer(u32 newSize)
     bufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
     bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-    HRESULT hr = m_device->CreateBuffer(&bufferDesc, nullptr, &m_vertexBuffer);
-    if (FAILED(hr))
-        return false;
-
-    m_vertexBufferSize = newSize;
-    return true;
+    if (SUCCEEDED(m_device->CreateBuffer(&bufferDesc, nullptr, &m_vertexBuffer)))
+    {
+        m_vertexBufferSize = newSize;
+    }
 }
 
-bool D3D11Backend::resizeIndexBuffer(u32 newSize)
+void D3D11Backend::ensureIndexBufferSize(u32 requiredSize)
 {
+    if (m_indexBufferSize >= requiredSize)
+        return;
+
     if (m_indexBuffer)
     {
         m_indexBuffer->Release();
         m_indexBuffer = nullptr;
     }
+
+    u32 newSize = std::max(requiredSize, m_indexBufferSize * 2);
+    if (newSize < 10000)
+        newSize = 10000;
 
     D3D11_BUFFER_DESC bufferDesc = {};
     bufferDesc.Usage = D3D11_USAGE_DYNAMIC;
@@ -374,12 +459,10 @@ bool D3D11Backend::resizeIndexBuffer(u32 newSize)
     bufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
     bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 
-    HRESULT hr = m_device->CreateBuffer(&bufferDesc, nullptr, &m_indexBuffer);
-    if (FAILED(hr))
-        return false;
-
-    m_indexBufferSize = newSize;
-    return true;
+    if (SUCCEEDED(m_device->CreateBuffer(&bufferDesc, nullptr, &m_indexBuffer)))
+    {
+        m_indexBufferSize = newSize;
+    }
 }
 
 void D3D11Backend::beginFrame(i32 displayWidth, i32 displayHeight)
@@ -388,7 +471,12 @@ void D3D11Backend::beginFrame(i32 displayWidth, i32 displayHeight)
     m_displayHeight = displayHeight;
 }
 
-void D3D11Backend::render(const DrawList& drawList)
+void D3D11Backend::endFrame()
+{
+    // Nothing to do
+}
+
+void D3D11Backend::renderDrawList(const DrawList& drawList)
 {
     const auto& vertices = drawList.vertices();
     const auto& indices = drawList.indices();
@@ -400,21 +488,11 @@ void D3D11Backend::render(const DrawList& drawList)
     }
 
     // Resize buffers if needed
-    if (vertices.size() > m_vertexBufferSize)
-    {
-        if (!resizeVertexBuffer(static_cast<u32>(vertices.size() * 1.5)))
-        {
-            return;
-        }
-    }
+    ensureVertexBufferSize(static_cast<u32>(vertices.size()));
+    ensureIndexBufferSize(static_cast<u32>(indices.size()));
 
-    if (indices.size() > m_indexBufferSize)
-    {
-        if (!resizeIndexBuffer(static_cast<u32>(indices.size() * 1.5)))
-        {
-            return;
-        }
-    }
+    if (!m_vertexBuffer || !m_indexBuffer)
+        return;
 
     // Upload vertex data
     D3D11_MAPPED_SUBRESOURCE vtxMapped;
@@ -438,59 +516,22 @@ void D3D11Backend::render(const DrawList& drawList)
     setupRenderState(m_displayWidth, m_displayHeight);
 
     // Render commands
-    u32 globalIdxOffset = 0;
-    u32 globalVtxOffset = 0;
-
-    for (const auto& cmd : commands)
-    {
-        // Set clip rect as scissor
-        D3D11_RECT scissor;
-        scissor.left = static_cast<LONG>(cmd.clipRect.min.x);
-        scissor.top = static_cast<LONG>(cmd.clipRect.min.y);
-        scissor.right = static_cast<LONG>(cmd.clipRect.max.x);
-        scissor.bottom = static_cast<LONG>(cmd.clipRect.max.y);
-        m_deviceContext->RSSetScissorRects(1, &scissor);
-
-        // Set texture
-        ID3D11ShaderResourceView* srv = reinterpret_cast<ID3D11ShaderResourceView*>(cmd.textureId);
-        if (srv)
-        {
-            m_deviceContext->PSSetShaderResources(0, 1, &srv);
-        }
-
-        // Draw
-        m_deviceContext->DrawIndexed(cmd.indexCount, globalIdxOffset, globalVtxOffset);
-
-        globalIdxOffset += cmd.indexCount;
-    }
-
-    // Restore render state
-    restoreRenderState();
+    renderDrawCommands(drawList);
 }
 
-void D3D11Backend::endFrame()
+void D3D11Backend::renderDrawLists(std::span<const DrawList*> drawLists)
 {
-    // Nothing to do for now
+    for (const auto* drawList : drawLists)
+    {
+        if (drawList)
+        {
+            renderDrawList(*drawList);
+        }
+    }
 }
 
 void D3D11Backend::setupRenderState(i32 displayWidth, i32 displayHeight)
 {
-    // Save current state
-    m_deviceContext->RSGetState(&m_savedState.rasterizerState);
-    m_deviceContext->OMGetBlendState(&m_savedState.blendState, m_savedState.blendFactor, &m_savedState.sampleMask);
-    m_deviceContext->OMGetDepthStencilState(&m_savedState.depthStencilState, &m_savedState.stencilRef);
-    m_deviceContext->PSGetShaderResources(0, 1, &m_savedState.psShaderResource);
-    m_deviceContext->PSGetSamplers(0, 1, &m_savedState.psSampler);
-    m_deviceContext->PSGetShader(&m_savedState.pixelShader, nullptr, nullptr);
-    m_deviceContext->VSGetShader(&m_savedState.vertexShader, nullptr, nullptr);
-    m_deviceContext->IAGetInputLayout(&m_savedState.inputLayout);
-    m_deviceContext->IAGetPrimitiveTopology((D3D11_PRIMITIVE_TOPOLOGY*)&m_savedState.primitiveTopology);
-    m_deviceContext->IAGetVertexBuffers(0, 1, &m_savedState.vertexBuffer, &m_savedState.vertexStride,
-                                        &m_savedState.vertexOffset);
-    m_deviceContext->IAGetIndexBuffer(&m_savedState.indexBuffer, (DXGI_FORMAT*)&m_savedState.indexFormat,
-                                      &m_savedState.indexOffset);
-    m_deviceContext->VSGetConstantBuffers(0, 1, &m_savedState.vsConstantBuffer);
-
     // Setup viewport
     D3D11_VIEWPORT viewport = {};
     viewport.Width = static_cast<f32>(displayWidth);
@@ -541,120 +582,111 @@ void D3D11Backend::setupRenderState(i32 displayWidth, i32 displayHeight)
     m_deviceContext->RSSetState(m_rasterizerState);
 }
 
-void D3D11Backend::restoreRenderState()
+void D3D11Backend::renderDrawCommands(const DrawList& drawList)
 {
-    m_deviceContext->RSSetState(m_savedState.rasterizerState);
-    if (m_savedState.rasterizerState)
-        m_savedState.rasterizerState->Release();
+    const auto& commands = drawList.commands();
 
-    m_deviceContext->OMSetBlendState(m_savedState.blendState, m_savedState.blendFactor, m_savedState.sampleMask);
-    if (m_savedState.blendState)
-        m_savedState.blendState->Release();
+    u32 globalIdxOffset = 0;
+    i32 globalVtxOffset = 0;
 
-    m_deviceContext->OMSetDepthStencilState(m_savedState.depthStencilState, m_savedState.stencilRef);
-    if (m_savedState.depthStencilState)
-        m_savedState.depthStencilState->Release();
+    for (const auto& cmd : commands)
+    {
+        // Set clip rect as scissor
+        D3D11_RECT scissor;
+        scissor.left = static_cast<LONG>(cmd.clipRect.min.x);
+        scissor.top = static_cast<LONG>(cmd.clipRect.min.y);
+        scissor.right = static_cast<LONG>(cmd.clipRect.max.x);
+        scissor.bottom = static_cast<LONG>(cmd.clipRect.max.y);
+        m_deviceContext->RSSetScissorRects(1, &scissor);
 
-    m_deviceContext->PSSetShaderResources(0, 1, &m_savedState.psShaderResource);
-    if (m_savedState.psShaderResource)
-        m_savedState.psShaderResource->Release();
+        // Set texture - use default white texture if none specified
+        ID3D11ShaderResourceView* srv = reinterpret_cast<ID3D11ShaderResourceView*>(cmd.textureId);
+        if (!srv)
+        {
+            srv = m_fontTextureView;  // Use default white texture
+        }
+        if (srv)
+        {
+            m_deviceContext->PSSetShaderResources(0, 1, &srv);
+        }
 
-    m_deviceContext->PSSetSamplers(0, 1, &m_savedState.psSampler);
-    if (m_savedState.psSampler)
-        m_savedState.psSampler->Release();
+        // Draw
+        m_deviceContext->DrawIndexed(cmd.indexCount, globalIdxOffset, globalVtxOffset);
 
-    m_deviceContext->PSSetShader(m_savedState.pixelShader, nullptr, 0);
-    if (m_savedState.pixelShader)
-        m_savedState.pixelShader->Release();
-
-    m_deviceContext->VSSetShader(m_savedState.vertexShader, nullptr, 0);
-    if (m_savedState.vertexShader)
-        m_savedState.vertexShader->Release();
-
-    m_deviceContext->IASetInputLayout(m_savedState.inputLayout);
-    if (m_savedState.inputLayout)
-        m_savedState.inputLayout->Release();
-
-    m_deviceContext->IASetPrimitiveTopology((D3D11_PRIMITIVE_TOPOLOGY)m_savedState.primitiveTopology);
-
-    m_deviceContext->IASetVertexBuffers(0, 1, &m_savedState.vertexBuffer, &m_savedState.vertexStride,
-                                        &m_savedState.vertexOffset);
-    if (m_savedState.vertexBuffer)
-        m_savedState.vertexBuffer->Release();
-
-    m_deviceContext->IASetIndexBuffer(m_savedState.indexBuffer, (DXGI_FORMAT)m_savedState.indexFormat,
-                                      m_savedState.indexOffset);
-    if (m_savedState.indexBuffer)
-        m_savedState.indexBuffer->Release();
-
-    m_deviceContext->VSSetConstantBuffers(0, 1, &m_savedState.vsConstantBuffer);
-    if (m_savedState.vsConstantBuffer)
-        m_savedState.vsConstantBuffer->Release();
+        globalIdxOffset += cmd.indexCount;
+    }
 }
 
-uintptr_t D3D11Backend::createTexture(const byte* pixels, i32 width, i32 height, i32 channels)
+TextureHandle D3D11Backend::createTexture(const TextureCreateInfo& info)
 {
-    if (!pixels || width <= 0 || height <= 0)
-    {
-        return 0;
-    }
+    TextureHandle handle{};
 
-    // Convert to RGBA if needed
-    std::vector<byte> rgbaData;
-    const byte* textureData = pixels;
+    if (info.width == 0 || info.height == 0)
+        return handle;
 
-    if (channels == 1)
+    // Determine format
+    DXGI_FORMAT dxgiFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+    u32 pixelSize = 4;
+
+    switch (info.format)
     {
-        rgbaData.resize(width * height * 4);
-        for (i32 i = 0; i < width * height; ++i)
-        {
-            rgbaData[i * 4 + 0] = std::byte{255};
-            rgbaData[i * 4 + 1] = std::byte{255};
-            rgbaData[i * 4 + 2] = std::byte{255};
-            rgbaData[i * 4 + 3] = pixels[i];
-        }
-        textureData = rgbaData.data();
-    }
-    else if (channels == 3)
-    {
-        rgbaData.resize(width * height * 4);
-        for (i32 i = 0; i < width * height; ++i)
-        {
-            rgbaData[i * 4 + 0] = pixels[i * 3 + 0];
-            rgbaData[i * 4 + 1] = pixels[i * 3 + 1];
-            rgbaData[i * 4 + 2] = pixels[i * 3 + 2];
-            rgbaData[i * 4 + 3] = std::byte{255};
-        }
-        textureData = rgbaData.data();
+        case TextureFormat::RGBA8:
+            dxgiFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+            pixelSize = 4;
+            break;
+        case TextureFormat::BGRA8:
+            dxgiFormat = DXGI_FORMAT_B8G8R8A8_UNORM;
+            pixelSize = 4;
+            break;
+        case TextureFormat::R8:
+            dxgiFormat = DXGI_FORMAT_R8_UNORM;
+            pixelSize = 1;
+            break;
+        case TextureFormat::RG8:
+            dxgiFormat = DXGI_FORMAT_R8G8_UNORM;
+            pixelSize = 2;
+            break;
+        default:
+            return handle;
     }
 
     // Create texture
     D3D11_TEXTURE2D_DESC texDesc = {};
-    texDesc.Width = width;
-    texDesc.Height = height;
-    texDesc.MipLevels = 1;
+    texDesc.Width = info.width;
+    texDesc.Height = info.height;
+    texDesc.MipLevels = info.generateMips ? 0 : 1;
     texDesc.ArraySize = 1;
-    texDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    texDesc.Format = dxgiFormat;
     texDesc.SampleDesc.Count = 1;
     texDesc.Usage = D3D11_USAGE_DEFAULT;
     texDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    if (info.renderTarget)
+        texDesc.BindFlags |= D3D11_BIND_RENDER_TARGET;
+    if (info.generateMips)
+        texDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
 
     D3D11_SUBRESOURCE_DATA initData = {};
-    initData.pSysMem = textureData;
-    initData.SysMemPitch = width * 4;
+    D3D11_SUBRESOURCE_DATA* pInitData = nullptr;
+
+    if (info.initialData)
+    {
+        initData.pSysMem = info.initialData;
+        initData.SysMemPitch = info.width * pixelSize;
+        pInitData = &initData;
+    }
 
     ID3D11Texture2D* texture = nullptr;
-    HRESULT hr = m_device->CreateTexture2D(&texDesc, &initData, &texture);
+    HRESULT hr = m_device->CreateTexture2D(&texDesc, pInitData, &texture);
     if (FAILED(hr))
     {
-        return 0;
+        return handle;
     }
 
     // Create shader resource view
     D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-    srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    srvDesc.Format = dxgiFormat;
     srvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-    srvDesc.Texture2D.MipLevels = 1;
+    srvDesc.Texture2D.MipLevels = info.generateMips ? static_cast<UINT>(-1) : 1;
 
     ID3D11ShaderResourceView* srv = nullptr;
     hr = m_device->CreateShaderResourceView(texture, &srvDesc, &srv);
@@ -662,34 +694,112 @@ uintptr_t D3D11Backend::createTexture(const byte* pixels, i32 width, i32 height,
 
     if (FAILED(hr))
     {
-        return 0;
+        return handle;
     }
 
-    return reinterpret_cast<uintptr_t>(srv);
+    handle.id = reinterpret_cast<uintptr_t>(srv);
+    handle.width = info.width;
+    handle.height = info.height;
+    handle.format = static_cast<u32>(info.format);
+
+    return handle;
 }
 
-void D3D11Backend::updateTexture(uintptr_t textureId, const byte* pixels, i32 width, i32 height, i32 channels)
+void D3D11Backend::updateTexture(TextureHandle texture, const void* data, usize dataSize, u32 x, u32 y, u32 width,
+                                 u32 height)
 {
-    (void)textureId;
-    (void)pixels;
-    (void)width;
-    (void)height;
-    (void)channels;
-    // TODO: Implement texture update
-}
+    (void)dataSize;  // Not used directly - size is inferred from width/height
 
-void D3D11Backend::destroyTexture(uintptr_t textureId)
-{
-    if (textureId == 0)
+    if (!texture.isValid() || !data)
         return;
 
-    ID3D11ShaderResourceView* srv = reinterpret_cast<ID3D11ShaderResourceView*>(textureId);
+    ID3D11ShaderResourceView* srv = reinterpret_cast<ID3D11ShaderResourceView*>(texture.id);
+
+    ID3D11Resource* resource = nullptr;
+    srv->GetResource(&resource);
+
+    if (!resource)
+        return;
+
+    u32 updateWidth = width > 0 ? width : texture.width;
+    u32 updateHeight = height > 0 ? height : texture.height;
+
+    D3D11_BOX box;
+    box.left = x;
+    box.top = y;
+    box.front = 0;
+    box.right = x + updateWidth;
+    box.bottom = y + updateHeight;
+    box.back = 1;
+
+    // Determine row pitch based on format
+    u32 pixelSize = 4;  // Assume RGBA8 by default
+    if (texture.format == static_cast<u32>(TextureFormat::R8))
+        pixelSize = 1;
+    else if (texture.format == static_cast<u32>(TextureFormat::RG8))
+        pixelSize = 2;
+
+    m_deviceContext->UpdateSubresource(resource, 0, &box, data, updateWidth * pixelSize, 0);
+
+    resource->Release();
+}
+
+void D3D11Backend::destroyTexture(TextureHandle texture)
+{
+    if (!texture.isValid())
+        return;
+
+    ID3D11ShaderResourceView* srv = reinterpret_cast<ID3D11ShaderResourceView*>(texture.id);
     srv->Release();
 }
 
-uintptr_t D3D11Backend::createFontAtlasTexture(const byte* pixels, i32 width, i32 height)
+void D3D11Backend::setViewport(i32 x, i32 y, i32 width, i32 height)
 {
-    return createTexture(pixels, width, height, 1);
+    D3D11_VIEWPORT viewport = {};
+    viewport.TopLeftX = static_cast<f32>(x);
+    viewport.TopLeftY = static_cast<f32>(y);
+    viewport.Width = static_cast<f32>(width);
+    viewport.Height = static_cast<f32>(height);
+    viewport.MinDepth = 0.0f;
+    viewport.MaxDepth = 1.0f;
+    m_deviceContext->RSSetViewports(1, &viewport);
+}
+
+void D3D11Backend::setScissorRect(i32 x, i32 y, i32 width, i32 height)
+{
+    D3D11_RECT rect;
+    rect.left = static_cast<LONG>(x);
+    rect.top = static_cast<LONG>(y);
+    rect.right = static_cast<LONG>(x + width);
+    rect.bottom = static_cast<LONG>(y + height);
+    m_deviceContext->RSSetScissorRects(1, &rect);
+}
+
+void D3D11Backend::invalidateDeviceState()
+{
+    // Force re-setup of render state on next draw
+}
+
+TextureHandle D3D11Backend::createFontTexture(u32 width, u32 height, const u8* pixels)
+{
+    // Create RGBA texture from grayscale font data
+    std::vector<u8> rgbaData(width * height * 4);
+    for (u32 i = 0; i < width * height; ++i)
+    {
+        rgbaData[i * 4 + 0] = 255;
+        rgbaData[i * 4 + 1] = 255;
+        rgbaData[i * 4 + 2] = 255;
+        rgbaData[i * 4 + 3] = pixels[i];
+    }
+
+    TextureCreateInfo info;
+    info.width = width;
+    info.height = height;
+    info.format = TextureFormat::RGBA8;
+    info.initialData = rgbaData.data();
+    info.initialDataSize = rgbaData.size();
+
+    return createTexture(info);
 }
 
 }  // namespace dakt::gui
@@ -700,60 +810,53 @@ uintptr_t D3D11Backend::createFontAtlasTexture(const byte* pixels, i32 width, i3
 namespace dakt::gui
 {
 
-static D3D11Backend* g_backend = nullptr;
-
-D3D11Backend* getD3D11Backend()
-{
-    return g_backend;
-}
-void setD3D11Backend(D3D11Backend* backend)
-{
-    g_backend = backend;
-}
-
 D3D11Backend::D3D11Backend() = default;
 D3D11Backend::~D3D11Backend() = default;
 
-bool D3D11Backend::initialize(const D3D11BackendConfig&)
+void D3D11Backend::configure(const D3D11BackendConfig&) {}
+bool D3D11Backend::initialize()
 {
     return false;
 }
 void D3D11Backend::shutdown() {}
 void D3D11Backend::beginFrame(i32, i32) {}
-void D3D11Backend::render(const DrawList&) {}
 void D3D11Backend::endFrame() {}
-uintptr_t D3D11Backend::createTexture(const byte*, i32, i32, i32)
+void D3D11Backend::renderDrawList(const DrawList&) {}
+void D3D11Backend::renderDrawLists(std::span<const DrawList*>) {}
+TextureHandle D3D11Backend::createTexture(const TextureCreateInfo&)
 {
-    return 0;
+    return {};
 }
-void D3D11Backend::updateTexture(uintptr_t, const byte*, i32, i32, i32) {}
-void D3D11Backend::destroyTexture(uintptr_t) {}
-uintptr_t D3D11Backend::createFontAtlasTexture(const byte*, i32, i32)
+void D3D11Backend::updateTexture(TextureHandle, const void*, usize, u32, u32, u32, u32) {}
+void D3D11Backend::destroyTexture(TextureHandle) {}
+void D3D11Backend::setViewport(i32, i32, i32, i32) {}
+void D3D11Backend::setScissorRect(i32, i32, i32, i32) {}
+void D3D11Backend::invalidateDeviceState() {}
+TextureHandle D3D11Backend::createFontTexture(u32, u32, const u8*)
 {
-    return 0;
+    return {};
 }
+bool D3D11Backend::createDeviceObjects()
+{
+    return false;
+}
+void D3D11Backend::destroyDeviceObjects() {}
 bool D3D11Backend::createShaders()
 {
     return false;
 }
-bool D3D11Backend::createRenderStates()
+bool D3D11Backend::createBuffers()
 {
     return false;
 }
-bool D3D11Backend::createBuffers(u32, u32)
+bool D3D11Backend::createStates()
 {
     return false;
 }
-bool D3D11Backend::resizeVertexBuffer(u32)
-{
-    return false;
-}
-bool D3D11Backend::resizeIndexBuffer(u32)
-{
-    return false;
-}
+void D3D11Backend::ensureVertexBufferSize(u32) {}
+void D3D11Backend::ensureIndexBufferSize(u32) {}
 void D3D11Backend::setupRenderState(i32, i32) {}
-void D3D11Backend::restoreRenderState() {}
+void D3D11Backend::renderDrawCommands(const DrawList&) {}
 
 }  // namespace dakt::gui
 
