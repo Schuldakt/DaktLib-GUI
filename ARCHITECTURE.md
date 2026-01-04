@@ -76,22 +76,26 @@ namespace dakt::gui {
 }
 ```
 
-## Directory Structure
+## Modular Directory Structure
 
 ```
 DaktLib-GUI/
 ├── include/dakt/gui/
-│   ├── GUI.hpp                 # Main include
-│   ├── Context.hpp
-│   ├── Immediate.hpp
-│   ├── UIContainer.hpp
-│   ├── Widget.hpp
-│   ├── Layout.hpp
-│   ├── Style.hpp
-│   ├── Input.hpp
-│   ├── Animation.hpp
-│   ├── DrawList.hpp
-│   ├── Text.hpp
+│   ├── GUI.hpp                        # Umbrella include
+│   ├── core/
+│   │   ├── Context.hpp
+│   │   ├── Frame.hpp
+│   │   └── Types.hpp                  # math/util structs, export macros
+│   ├── immediate/Immediate.hpp
+│   ├── retained/
+│   │   ├── UIContainer.hpp
+│   │   └── Widget.hpp
+│   ├── layout/Layout.hpp
+│   ├── style/Style.hpp
+│   ├── input/Input.hpp
+│   ├── animation/Animation.hpp
+│   ├── draw/DrawList.hpp
+│   ├── text/Text.hpp
 │   ├── backend/
 │   │   ├── IRenderBackend.hpp
 │   │   ├── DX11.hpp
@@ -99,30 +103,41 @@ DaktLib-GUI/
 │   │   ├── Vulkan.hpp
 │   │   ├── OpenGL.hpp
 │   │   └── Metal.hpp
-│   └── c_api.h
+│   └── c_api/c_api.h
 ├── src/
-│   ├── Context.cpp
-│   ├── Immediate.cpp
-│   ├── UIContainer.cpp
-│   ├── Layout.cpp
-│   ├── Style.cpp
-│   ├── Input.cpp
-│   ├── Animation.cpp
-│   ├── DrawList.cpp
-│   ├── Text.cpp
+│   ├── core/
+│   │   ├── Context.cpp
+│   │   ├── Frame.cpp
+│   │   └── Types.cpp
+│   ├── immediate/Immediate.cpp
+│   ├── retained/
+│   │   ├── UIContainer.cpp
+│   │   └── Widget.cpp
+│   ├── layout/Layout.cpp
+│   ├── style/Style.cpp
+│   ├── input/Input.cpp
+│   ├── animation/Animation.cpp
+│   ├── draw/DrawList.cpp
+│   ├── text/Text.cpp
 │   ├── backend/
 │   │   ├── DX11.cpp
 │   │   ├── DX12.cpp
 │   │   ├── Vulkan.cpp
 │   │   ├── OpenGL.cpp
 │   │   └── Metal.mm
-│   └── c_api.cpp
+│   └── c_api/c_api.cpp
 ├── shaders/            # HLSL/GLSL/MSL sources
 ├── tests/
 ├── CMakeLists.txt
 ├── ARCHITECTURE.md
 └── TODO.md
 ```
+
+### Modularity Notes
+- Each subdirectory maps to a subsystem to enable incremental development and backend-specific toggling.
+- Umbrella header `GUI.hpp` re-exports public headers to keep end-user include stable while internals can evolve.
+- Backend headers stay isolated under `backend/` to avoid leaking platform-specific types into the core.
+- `c_api` is isolated to keep C linkage and export macros separate from the C++ namespace.
 
 ## Core Concepts
 

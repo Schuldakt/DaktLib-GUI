@@ -7,8 +7,9 @@
 ---
 
 ## Phase 1: Foundation
-- [ ] **[S]** CMake scaffolding, export macros, presets
-- [ ] **[S]** Core types (`Context`, `Frame`, `DrawList`, `RenderState`)
+- [ ] **[S]** Modular tree scaffolding (core/immediate/retained/layout/style/input/animation/draw/text/backend/c_api)
+- [ ] **[S]** CMake scaffolding (C++23, presets, `CMAKE_EXPORT_COMPILE_COMMANDS`)
+- [ ] **[S]** Core types (`Context`, `Frame`, `DrawList`, `RenderState`, export macros)
 - [ ] **[M]** Vertex/index buffer formats (pos2, uv, color; optional SDF data)
 - [ ] **[S]** Color utilities, rect math, DPI helpers
 
