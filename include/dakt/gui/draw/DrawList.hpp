@@ -1,35 +1,23 @@
-#pragma once
+#ifndef DAKT_GUI_DRAW_HPP
+#define DAKT_GUI_DRAW_HPP
 
 #include "../core/Types.hpp"
-#include <cstddef>
 #include <vector>
 
 namespace dakt::gui {
 
-struct Vertex {
-  Vec2 pos{};
-  Vec2 uv{};
-  Color color{};
-};
-
-struct DrawCommand {
-  Rect clip{};
-  std::size_t elemCount{0};
-};
-
 class DrawList {
-public:
-  DrawList() = default;
-  void clear() {
-    vertices_.clear();
-    commands_.clear();
-  }
-  const std::vector<Vertex> &vertices() const { return vertices_; }
-  const std::vector<DrawCommand> &commands() const { return commands_; }
+  public:
+    DrawList();
+    ~DrawList();
 
-private:
-  std::vector<Vertex> vertices_{};
-  std::vector<DrawCommand> commands_{};
+    void reset();
+    void drawRect(const Rect& rect, Color color);
+
+  private:
+    std::vector<uint8_t> commands_;
 };
 
 } // namespace dakt::gui
+
+#endif

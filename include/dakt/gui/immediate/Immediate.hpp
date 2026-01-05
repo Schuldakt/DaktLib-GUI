@@ -1,21 +1,13 @@
-#pragma once
-
-#include "../core/Types.hpp"
+#ifndef DAKT_GUI_IMMEDIATE_HPP
+#define DAKT_GUI_IMMEDIATE_HPP
 
 namespace dakt::gui {
 
 class Context;
 
-class Immediate {
-public:
-  Immediate() = default;
-  explicit Immediate(Context *ctx) : ctx_(ctx) {}
-
-  void setContext(Context *ctx) { ctx_ = ctx; }
-  Context *context() const { return ctx_; }
-
-private:
-  Context *ctx_{nullptr};
-};
+void beginFrame(Context* ctx, float deltaTime);
+void endFrame(Context* ctx);
 
 } // namespace dakt::gui
+
+#endif

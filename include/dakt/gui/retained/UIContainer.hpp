@@ -1,18 +1,20 @@
-#pragma once
-
-#include "../core/Types.hpp"
+#ifndef DAKT_GUI_RETAINED_HPP
+#define DAKT_GUI_RETAINED_HPP
 
 namespace dakt::gui {
 
-class Context;
-class Widget;
-
 class UIContainer {
-public:
-  UIContainer() = default;
-  virtual ~UIContainer() = default;
+  public:
+    UIContainer();
+    ~UIContainer();
+};
 
-  virtual void build(Context &) {}
+class Widget {
+  public:
+    Widget();
+    virtual ~Widget();
 };
 
 } // namespace dakt::gui
+
+#endif

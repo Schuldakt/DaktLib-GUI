@@ -1,23 +1,14 @@
-#pragma once
-
-#include "../core/Types.hpp"
+#ifndef DAKT_GUI_ANIMATION_HPP
+#define DAKT_GUI_ANIMATION_HPP
 
 namespace dakt::gui {
 
-struct Easing {
-  enum class Type { Linear, QuadInOut, CubicInOut };
-
-  Type type{Type::Linear};
-};
-
 class Animator {
-public:
-  Animator() = default;
-  void setEasing(Easing easing) { easing_ = easing; }
-  Easing easing() const { return easing_; }
-
-private:
-  Easing easing_{};
+  public:
+    Animator();
+    ~Animator();
 };
 
 } // namespace dakt::gui
+
+#endif

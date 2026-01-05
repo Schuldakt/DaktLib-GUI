@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DAKT_GUI_GUI_HPP
+#define DAKT_GUI_GUI_HPP
 
 #include "animation/Animation.hpp"
 #include "backend/IRenderBackend.hpp"
@@ -10,6 +11,8 @@
 #include "input/Input.hpp"
 #include "layout/Layout.hpp"
 #include "retained/UIContainer.hpp"
-#include "retained/Widget.hpp"
 #include "style/Style.hpp"
 #include "text/Text.hpp"
+
+
+#endif

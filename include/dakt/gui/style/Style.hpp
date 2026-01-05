@@ -1,25 +1,22 @@
-#pragma once
+#ifndef DAKT_GUI_STYLE_HPP
+#define DAKT_GUI_STYLE_HPP
 
 #include "../core/Types.hpp"
 
 namespace dakt::gui {
 
-struct Theme {
-  Color background{};
-  Color foreground{};
-  float spacing{4.0F};
-  float radius{4.0F};
-};
+class Theme {
+  public:
+    Theme();
+    ~Theme();
 
-class Style {
-public:
-  Style() = default;
-  explicit Style(Theme theme) : theme_(theme) {}
-  const Theme &theme() const { return theme_; }
-  void setTheme(const Theme &theme) { theme_ = theme; }
+    void setColor(const char* name, Color color);
+    Color getColor(const char* name) const;
 
-private:
-  Theme theme_{};
+  private:
+    Color colors_[16] = {};
 };
 
 } // namespace dakt::gui
+
+#endif

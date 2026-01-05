@@ -1,0 +1,113 @@
+name: Build
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  CMAKE_VERSION: 4.21
+  NINJA_VERSION: 1.11
+  BUILD_TYPE: Release
+
+jobs:
+  build-matrix:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Windows x86
+          - name: Windows x86
+            os: windows-2022
+            runner-labels: "self-hosted,windows,x86"
+            arch: x86
+            toolchain: toolchains/windows-x86.cmake
+            artifact-dir: build\bin\Release
+
+          # Windows x64
+          - name: Windows x64
+            os: windows-2022
+            runner-labels: "self-hosted,windows,x64"
+            arch: x64
+            toolchain: toolchains/windows-x64.cmake
+            artifact-dir: build\bin\Release
+
+          # Linux x64
+          - name: Linux x64
+            os: ubuntu-latest
+            runner-labels: "self-hosted,linux,x64"
+            arch: x64
+            toolchain: toolchains/linux-x64.cmake
+            artifact-dir: build/bin
+
+          # macOS x64
+          - name: macOS x64
+            os: macos-latest
+            runner-labels: "self-hosted,macos,x64"
+            arch: x64
+            toolchain: toolchains/macos-x64.cmake
+            artifact-dir: build/bin
+
+          # macOS ARM64
+          - name: macOS ARM64
+            os: macos-latest-xlarge
+            runner-labels: "self-hosted,macos,arm64"
+            arch: arm64
+            toolchain: toolchains/macos-arm64.cmake
+            artifact-dir: build/bin
+
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.runner-labels }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt update
+          sudo apt install -y cmake ninja-build clang vulkan-sdk
+
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew install cmake ninja vulkan-sdk
+
+      - name: Configure CMake
+        run: |
+          cmake -S . -B build -G "Ninja" \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} \
+            -DDAKT_GUI_BUILD_TESTS=ON \
+            -DDAKT_GUI_BUILD_SHOWCASE=ON
+
+      - name: Build
+        run: ninja -C build
+
+      - name: Run tests
+        run: ctest --output-on-failure -C ${{ env.BUILD_TYPE }}
+        working-directory: build
+
+      - name: Upload artifacts
+        if: success()
+        uses: actions/upload-artifact@v3
+        with:
+          name: DaktLib-GUI-${{ matrix.name }}-${{ matrix.arch }}
+          path: |
+            ${{ matrix.artifact-dir }}/
+            include/
+            bindings/csharp/
+
+  status-check:
+    needs: build-matrix
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Check build status
+        run: |
+          if [ "${{ needs.build-matrix.result }}" == "failure" ]; then
+            echo "Build failed on one or more platforms"
+            exit 1
+          fi

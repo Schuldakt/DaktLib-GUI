@@ -1,1 +1,3 @@
-#include "dakt/gui/retained/Widget.hpp"
+namespace dakt::gui {
+void Widget_Init2() {}
+} // namespace dakt::gui

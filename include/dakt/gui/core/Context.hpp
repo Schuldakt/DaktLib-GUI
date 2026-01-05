@@ -1,22 +1,46 @@
-#pragma once
+#ifndef DAKT_GUI_CONTEXT_HPP
+#define DAKT_GUI_CONTEXT_HPP
 
+#include "../style/Style.hpp"
 #include "Types.hpp"
+#include <memory>
+#include <vector>
 
 namespace dakt::gui {
 
 class IRenderBackend;
+class DrawList;
+class LayoutNode;
+class InputSystem;
 
 class Context {
-public:
-  Context() = default;
-  explicit Context(IRenderBackend *backend) : backend_(backend) {}
-  ~Context() = default;
+  public:
+    Context(IRenderBackend* backend);
+    ~Context();
 
-  void setBackend(IRenderBackend *backend) { backend_ = backend; }
-  IRenderBackend *backend() const { return backend_; }
+    void newFrame(float deltaTime);
+    void endFrame();
 
-private:
-  IRenderBackend *backend_{nullptr};
+    // State accessors
+    float getDeltaTime() const { return deltaTime_; }
+    uint32_t getFrameCount() const { return frameCount_; }
+    IRenderBackend* getBackend() { return backend_; }
+    Theme& getTheme() { return theme_; }
+    const Theme& getTheme() const { return theme_; }
+
+    // Layout & rendering
+    DrawList& getDrawList();
+    LayoutNode* getRootLayout();
+
+  private:
+    IRenderBackend* backend_;
+    Theme theme_;
+    float deltaTime_ = 0.0f;
+    uint32_t frameCount_ = 0;
+    std::unique_ptr<DrawList> drawList_;
+    std::unique_ptr<LayoutNode> rootLayout_;
 };
 
 } // namespace dakt::gui
+
+#endif // DAKT_GUI_CONTEXT_HPP

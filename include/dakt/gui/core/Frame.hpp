@@ -1,22 +1,28 @@
-#pragma once
+#ifndef DAKT_GUI_FRAME_HPP
+#define DAKT_GUI_FRAME_HPP
 
+#include "../input/Input.hpp"
 #include "Types.hpp"
+
 
 namespace dakt::gui {
 
-struct FrameTiming {
-  float deltaTime{0.0F};
-};
-
 class Frame {
-public:
-  Frame() = default;
-  explicit Frame(FrameTiming timing) : timing_(timing) {}
-  const FrameTiming &timing() const { return timing_; }
-  void setTiming(const FrameTiming &timing) { timing_ = timing; }
+  public:
+    Frame();
+    ~Frame();
 
-private:
-  FrameTiming timing_{};
+    void reset();
+    void updateInput(const MouseInput& mouse, const KeyboardInput& keyboard);
+
+    const MouseInput& getMouseInput() const { return mouseInput_; }
+    const KeyboardInput& getKeyboardInput() const { return keyboardInput_; }
+
+  private:
+    MouseInput mouseInput_;
+    KeyboardInput keyboardInput_;
 };
 
 } // namespace dakt::gui
+
+#endif // DAKT_GUI_FRAME_HPP
