@@ -10,6 +10,7 @@ namespace dakt::gui {
 class Context;
 class DrawList;
 struct Theme;
+class Widget;
 
 // ============================================================================
 // Frame Management
@@ -270,6 +271,13 @@ DrawList* getWindowDrawList();
 DrawList* getForegroundDrawList();
 DrawList* getBackgroundDrawList();
 
+// ============================================================================
+// Retained embedding
+// ============================================================================
+// Embed a retained-mode widget tree inside the current immediate layout.
+// `id` is used to generate stable IDs for interaction. If `size` is zero,
+// the widget's `measureContent()` will be used to size it.
+void embedRetained(const char* id, dakt::gui::Widget* widget, Vec2 size = Vec2(0, 0));
 } // namespace dakt::gui
 
 #endif

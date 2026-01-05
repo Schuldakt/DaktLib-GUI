@@ -2,6 +2,7 @@
 #include "dakt/gui/draw/DrawList.hpp"
 #include "dakt/gui/immediate/Immediate.hpp"
 #include "dakt/gui/input/Input.hpp"
+#include "dakt/gui/retained/Widget.hpp"
 #include "dakt/gui/style/Style.hpp"
 #include <algorithm>
 #include <cstdarg>
@@ -200,6 +201,39 @@ void labelText(const char* label, const char* fmt, ...) {
 
     float textHeight = 16.0f;
     setCursorPos(Vec2(pos.x, pos.y + textHeight + 4.0f));
+}
+
+// ============================================================================
+// Embed retained widget tree
+// ============================================================================
+
+void embedRetained(const char* id, Widget* widget, Vec2 size) {
+    if (!g_state.ctx || !widget)
+        return;
+
+    // Push a stable ID scope for the embedded widget
+    pushID(id);
+
+    // Determine position in window coordinates
+    Vec2 cursor = getCursorPos();
+    Vec2 windowPos = getWindowPos();
+    Vec2 worldPos = windowPos + cursor;
+
+    // Size determination: if zero, ask widget to measure
+    Vec2 finalSize = size;
+    if (finalSize.x <= 0.0f || finalSize.y <= 0.0f) {
+        finalSize = widget->measureContent();
+    }
+
+    // Set widget bounds and build into current context
+    widget->setPosition(worldPos);
+    widget->setSize(finalSize);
+    widget->build(*g_state.ctx);
+
+    // Advance the immediate cursor past the embedded widget
+    setCursorPos(Vec2(cursor.x, cursor.y + finalSize.y + 4.0f));
+
+    popID();
 }
 
 // ============================================================================
