@@ -1,0 +1,16 @@
+@PACKAGE_INIT@
+
+include(CMakeFindDependencyMacro)
+
+include("${CMAKE_CURRENT_LIST_DIR}/daktguiTargets.cmake")
+
+check_required_components(daktgui)
+
+# Create alias targets
+if(TARGET dakt::daktgui_shared AND NOT TARGET daktgui::daktgui)
+    add_library(daktgui::daktgui ALIAS dakt::daktgui_shared)
+endif()
+
+if(TARGET dakt::daktgui_static AND NOT TARGET daktgui::daktgui_static)
+    add_library(daktgui::daktgui_static ALIAS dakt::daktgui_static)
+endif()

@@ -1,7 +1,7 @@
 #include "dakt/gui/text/Font.hpp"
 #include "dakt/gui/text/TTFParser.hpp"
 
-namespace dakt::gui::text {
+namespace dakt::gui {
 
 Font::Font() = default;
 
@@ -59,4 +59,4 @@ float Font::unitsFromPixels(float pixels, float fontSize) const {
     return (pixels / fontSize) * unitsPerEm_;
 }
 
-} // namespace dakt::gui::text
+} // namespace dakt::gui

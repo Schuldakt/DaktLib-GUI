@@ -1,20 +1,19 @@
-#ifndef DAKT_GUI_RETAINED_HPP
-#define DAKT_GUI_RETAINED_HPP
+#ifndef DAKT_GUI_UICONTAINER_HPP
+#define DAKT_GUI_UICONTAINER_HPP
 
-namespace dakt::gui {
+/**
+ * @file UIContainer.hpp
+ * @brief Backward compatibility header - includes all containers
+ *
+ * For new code, prefer including specific container headers:
+ * - containers/ContainerBase.hpp for UIContainer base class
+ * - containers/VBox.hpp, containers/HBox.hpp, etc. for specific containers
+ * - Containers.hpp for all containers at once
+ */
 
-class UIContainer {
-  public:
-    UIContainer();
-    ~UIContainer();
-};
+#include "Containers.hpp"
 
-class Widget {
-  public:
-    Widget();
-    virtual ~Widget();
-};
+// Also include widgets for backward compatibility (UIContainer uses Widget)
+#include "Widgets.hpp"
 
-} // namespace dakt::gui
-
-#endif
+#endif // DAKT_GUI_UICONTAINER_HPP

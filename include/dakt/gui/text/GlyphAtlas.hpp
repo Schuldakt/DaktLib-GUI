@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace dakt::gui::text {
+namespace dakt::gui {
 
 // Forward declarations
 class Font;
@@ -88,6 +88,6 @@ class GlyphAtlas {
     bool enableMSDF_ = false;
 };
 
-} // namespace dakt::gui::text
+} // namespace dakt::gui
 
 #endif

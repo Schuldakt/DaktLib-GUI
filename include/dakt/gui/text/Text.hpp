@@ -7,7 +7,7 @@
 #include <string>
 #include <vector>
 
-namespace dakt::gui::text {
+namespace dakt::gui {
 
 // Forward declarations
 class Font;
@@ -78,6 +78,6 @@ class TextRenderer {
     TextShaper shaper_;
 };
 
-} // namespace dakt::gui::text
+} // namespace dakt::gui
 
 #endif

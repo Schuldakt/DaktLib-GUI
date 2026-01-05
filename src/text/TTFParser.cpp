@@ -5,7 +5,7 @@
 #include <fstream>
 #include <vector>
 
-namespace dakt::gui::text {
+namespace dakt::gui {
 
 // ============================================================================
 // BinaryStream Implementation
@@ -210,7 +210,7 @@ bool TTFParser::parseLocaTable(BinaryStream& stream) {
 }
 
 bool TTFParser::parseGlyfTable(BinaryStream& stream) {
-    const TableDirectory* glyfTable = findTable(0x67006C6F); // 'glyf'
+    const TableDirectory* glyfTable = findTable(0x676C7966); // 'glyf'
     if (!glyfTable)
         return false;
 
@@ -520,7 +520,7 @@ const GlyphOutline* TTFParser::getGlyphOutline(uint16_t glyphId) const {
         return &it->second;
     }
 
-    const TableDirectory* glyfTable = findTable(0x67006C6F); // 'glyf'
+    const TableDirectory* glyfTable = findTable(0x676C7966); // 'glyf'
     if (!glyfTable)
         return nullptr;
 
@@ -563,4 +563,4 @@ int16_t TTFParser::getAdvanceWidth(uint16_t glyphId) const { return glyphId < ad
 
 int16_t TTFParser::getLeftSideBearing(uint16_t glyphId) const { return glyphId < leftSideBearings_.size() ? leftSideBearings_[glyphId] : 0; }
 
-} // namespace dakt::gui::text
+} // namespace dakt::gui

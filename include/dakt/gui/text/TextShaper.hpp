@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-namespace dakt::gui::text {
+namespace dakt::gui {
 
 // Forward declaration
 class Font;
@@ -66,6 +66,6 @@ class TextShaper {
     std::vector<Feature> features_;
 };
 
-} // namespace dakt::gui::text
+} // namespace dakt::gui
 
 #endif

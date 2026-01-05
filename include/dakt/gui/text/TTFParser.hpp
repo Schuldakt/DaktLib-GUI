@@ -8,7 +8,7 @@
 #include <unordered_map>
 #include <vector>
 
-namespace dakt::gui::text {
+namespace dakt::gui {
 
 /**
  * @brief Binary stream reader for big-endian font data
@@ -155,6 +155,10 @@ class TTFParser {
     const std::string& getFullName() const { return fullName_; }
     const std::string& getFamilyName() const { return familyName_; }
 
+    // Raw data access (for variable font support)
+    const std::vector<uint8_t>& getFontData() const { return fontData_; }
+    const TableDirectory* findTable(uint32_t tag) const;
+
   private:
     // Parsing methods for each table
     bool parseOffsetTable(BinaryStream& stream);
@@ -173,9 +177,6 @@ class TTFParser {
 
     // Helper for name table string extraction
     std::string extractNameString(const std::vector<uint8_t>& data, uint16_t offset, uint16_t length, uint16_t platformId);
-
-    // Table directory lookup
-    const TableDirectory* findTable(uint32_t tag) const;
 
     // State
     std::vector<uint8_t> fontData_;
@@ -197,6 +198,6 @@ class TTFParser {
     std::string familyName_;
 };
 
-} // namespace dakt::gui::text
+} // namespace dakt::gui
 
 #endif

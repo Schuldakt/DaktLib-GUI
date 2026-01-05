@@ -9,8 +9,7 @@
 #include <unordered_map>
 #include <vector>
 
-
-namespace dakt::gui::text {
+namespace dakt::gui {
 
 // Forward declaration
 class TTFParser;
@@ -72,6 +71,6 @@ class Font {
     mutable std::unordered_map<uint16_t, Glyph> glyphCache_;
 };
 
-} // namespace dakt::gui::text
+} // namespace dakt::gui
 
 #endif

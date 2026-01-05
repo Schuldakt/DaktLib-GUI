@@ -3,7 +3,7 @@
 #include "dakt/gui/text/GlyphAtlas.hpp"
 #include <algorithm>
 
-namespace dakt::gui::text {
+namespace dakt::gui {
 
 TextRenderer::TextRenderer() = default;
 TextRenderer::~TextRenderer() = default;
@@ -118,4 +118,4 @@ float TextRenderer::measureLine(const std::string& fontName, const std::string& 
     return width;
 }
 
-} // namespace dakt::gui::text
+} // namespace dakt::gui
