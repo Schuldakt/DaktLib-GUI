@@ -2,10 +2,18 @@
  * @file Widget.cpp
  * @brief Implementation of Widget base class and concrete widgets
  */
-
-#include "dakt/gui/retained/Widget.hpp"
 #include "dakt/gui/core/Context.hpp"
 #include "dakt/gui/draw/DrawList.hpp"
+#include "dakt/gui/retained/widgets/Button.hpp"
+#include "dakt/gui/retained/widgets/Checkbox.hpp"
+#include "dakt/gui/retained/widgets/Label.hpp"
+#include "dakt/gui/retained/widgets/Panel.hpp"
+#include "dakt/gui/retained/widgets/ScrollView.hpp"
+#include "dakt/gui/retained/widgets/Slider.hpp"
+#include "dakt/gui/retained/widgets/TabBar.hpp"
+#include "dakt/gui/retained/widgets/TextInput.hpp"
+#include "dakt/gui/retained/widgets/TreeNode.hpp"
+#include "dakt/gui/retained/widgets/WidgetBase.hpp"
 #include <algorithm>
 #include <cmath>
 
@@ -460,7 +468,7 @@ void Checkbox::drawContent(DrawList& drawList) {
 
 Slider::Slider() { setMinSize(Vec2(100, 24)); }
 
-Slider::Slider(float min, float max, float value) : min_(min), max_(max), value_(value) { setMinSize(Vec2(100, 24)); }
+Slider::Slider(float min, float max, float value) : value_(value), min_(min), max_(max) { setMinSize(Vec2(100, 24)); }
 
 void Slider::setValue(float value) {
     value = std::clamp(value, min_, max_);

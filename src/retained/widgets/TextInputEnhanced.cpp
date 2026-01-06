@@ -1,4 +1,3 @@
-#include "dakt/gui/draw/DrawList.hpp"
 #include "dakt/gui/retained/widgets/TextInput.hpp"
 #include <algorithm>
 #include <cctype>

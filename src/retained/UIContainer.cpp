@@ -3,11 +3,15 @@
  * @brief Implementation of UIContainer - retained mode widget tree manager
  */
 
-#include "dakt/gui/retained/UIContainer.hpp"
 #include "dakt/gui/core/Context.hpp"
 #include "dakt/gui/draw/DrawList.hpp"
-#include "dakt/gui/input/Input.hpp"
-#include <algorithm>
+#include "dakt/gui/retained/Containers/ContainerBase.hpp"
+#include "dakt/gui/retained/Containers/Grid.hpp"
+#include "dakt/gui/retained/Containers/HBox.hpp"
+#include "dakt/gui/retained/Containers/Splitter.hpp"
+#include "dakt/gui/retained/Containers/Stack.hpp"
+#include "dakt/gui/retained/Containers/VBox.hpp"
+#include "dakt/gui/retained/Containers/Wrap.hpp"
 
 namespace dakt::gui {
 
