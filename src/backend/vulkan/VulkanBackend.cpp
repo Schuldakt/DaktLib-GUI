@@ -3,7 +3,7 @@
 // Only compile when Vulkan is enabled
 #if defined(DAKTLIB_ENABLE_VULKAN)
 
-#include "dakt/gui/draw/DrawList.hpp"
+#include "dakt/gui/subsystems/draw/DrawList.hpp"
 
 #include <algorithm>
 #include <cstring>

@@ -1,7 +1,7 @@
 #ifndef DAKTLIB_GUI_TEXT_SHAPER_HPP
 #define DAKTLIB_GUI_TEXT_SHAPER_HPP
 
-#include "../core/Types.hpp"
+#include "../../core/Types.hpp"
 #include <cstdint>
 #include <string>
 #include <vector>

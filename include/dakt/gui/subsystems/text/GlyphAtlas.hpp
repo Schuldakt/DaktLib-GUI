@@ -1,7 +1,7 @@
 #ifndef DAKTLIB_GUI_GLYPH_ATLAS_HPP
 #define DAKTLIB_GUI_GLYPH_ATLAS_HPP
 
-#include "../core/Types.hpp"
+#include "../../core/Types.hpp"
 #include <cstdint>
 #include <map>
 #include <string>

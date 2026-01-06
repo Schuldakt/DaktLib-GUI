@@ -1,7 +1,7 @@
 #ifndef DAKTLIB_GUI_SDF_GENERATOR_HPP
 #define DAKTLIB_GUI_SDF_GENERATOR_HPP
 
-#include "../core/Types.hpp"
+#include "../../core/Types.hpp"
 #include "TTFParser.hpp"
 #include <cstdint>
 #include <vector>

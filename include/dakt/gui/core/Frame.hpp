@@ -1,7 +1,7 @@
 #ifndef DAKTLIB_GUI_FRAME_HPP
 #define DAKTLIB_GUI_FRAME_HPP
 
-#include "../input/Input.hpp"
+#include "../subsystems/input/Input.hpp"
 #include "Types.hpp"
 
 namespace dakt::gui {

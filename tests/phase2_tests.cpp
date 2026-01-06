@@ -6,15 +6,15 @@
  */
 
 #include "dakt/gui/core/Types.hpp"
-#include "dakt/gui/text/Font.hpp"
-#include "dakt/gui/text/GlyphAtlas.hpp"
-#include "dakt/gui/text/GlyphCache.hpp"
-#include "dakt/gui/text/OTFParser.hpp"
-#include "dakt/gui/text/SDFGenerator.hpp"
-#include "dakt/gui/text/TTFParser.hpp"
-#include "dakt/gui/text/TextCursor.hpp"
-#include "dakt/gui/text/TextShaper.hpp"
-#include "dakt/gui/text/VariableFont.hpp"
+#include "dakt/gui/subsystems/text/Font.hpp"
+#include "dakt/gui/subsystems/text/GlyphAtlas.hpp"
+#include "dakt/gui/subsystems/text/GlyphCache.hpp"
+#include "dakt/gui/subsystems/text/OTFParser.hpp"
+#include "dakt/gui/subsystems/text/SDFGenerator.hpp"
+#include "dakt/gui/subsystems/text/TTFParser.hpp"
+#include "dakt/gui/subsystems/text/TextCursor.hpp"
+#include "dakt/gui/subsystems/text/TextShaper.hpp"
+#include "dakt/gui/subsystems/text/VariableFont.hpp"
 
 #include <cassert>
 #include <cmath>

@@ -1,8 +1,8 @@
 #include "dakt/gui/immediate/Immediate.hpp"
 #include "dakt/gui/core/Context.hpp"
-#include "dakt/gui/draw/DrawList.hpp"
-#include "dakt/gui/input/Input.hpp"
-#include "dakt/gui/style/Style.hpp"
+#include "dakt/gui/subsystems/draw/DrawList.hpp"
+#include "dakt/gui/subsystems/input/Input.hpp"
+#include "dakt/gui/subsystems/style/Style.hpp"
 #include <cstdarg>
 #include <stack>
 #include <vector>

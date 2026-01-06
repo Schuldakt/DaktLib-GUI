@@ -1,7 +1,7 @@
 #ifndef DAKTLIB_GUI_HIT_TEST_HPP
 #define DAKTLIB_GUI_HIT_TEST_HPP
 
-#include "../core/Types.hpp"
+#include "../../core/Types.hpp"
 #include "../layout/Layout.hpp"
 #include <cstdint>
 #include <vector>

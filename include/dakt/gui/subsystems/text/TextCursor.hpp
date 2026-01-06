@@ -1,7 +1,7 @@
 #ifndef DAKTLIB_GUI_TEXT_CURSOR_HPP
 #define DAKTLIB_GUI_TEXT_CURSOR_HPP
 
-#include "../core/Types.hpp"
+#include "../../core/Types.hpp"
 #include "TextShaper.hpp"
 #include <string>
 #include <vector>

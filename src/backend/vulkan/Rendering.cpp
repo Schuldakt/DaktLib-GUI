@@ -2,7 +2,7 @@
 
 #if defined(DAKTLIB_ENABLE_VULKAN)
 
-#include "dakt/gui/draw/DrawList.hpp"
+#include "dakt/gui/subsystems/draw/DrawList.hpp"
 #include <cstring>
 
 #if defined(DAKTLIB_PLATFORM_WINDOWS) || defined(_WIN32)

@@ -159,36 +159,36 @@ set(DAKTLIB_GUI_SOURCES
     src/core/Frame.cpp
 
     # Layout
-    src/layout/Layout.cpp
-    src/layout/FlexLayout.cpp
+    src/subsystems/layout/Layout.cpp
+    src/subsystems/layout/FlexLayout.cpp
 
     # Style
-    src/style/Style.cpp
-    src/style/Theme.cpp
+    src/subsystems/style/Style.cpp
+    src/subsystems/style/Theme.cpp
 
     # Input
-    src/input/Input.cpp
-    src/input/HitTest.cpp
+    src/subsystems/input/Input.cpp
+    src/subsystems/input/HitTest.cpp
 
     # Animation
     src/animation/Animation.cpp
     src/animation/Timeline.cpp
 
     # Text
-    src/text/Text.cpp
-    src/text/Font.cpp
-    src/text/GlyphAtlas.cpp
-    src/text/GlyphCache.cpp
-    src/text/TextShaper.cpp
-    src/text/TextCursor.cpp
-    src/text/TTFParser.cpp
-    src/text/SDFGenerator.cpp
-    src/text/VariableFont.cpp
-    src/text/OTFParser.cpp
+    src/subsystems/text/Text.cpp
+    src/subsystems/text/Font.cpp
+    src/subsystems/text/GlyphAtlas.cpp
+    src/subsystems/text/GlyphCache.cpp
+    src/subsystems/text/TextShaper.cpp
+    src/subsystems/text/TextCursor.cpp
+    src/subsystems/text/TTFParser.cpp
+    src/subsystems/text/SDFGenerator.cpp
+    src/subsystems/text/VariableFont.cpp
+    src/subsystems/text/OTFParser.cpp
 
     # Draw
-    src/draw/DrawList.cpp
-    src/draw/DrawBatcher.cpp
+    src/subsystems/draw/DrawList.cpp
+    src/subsystems/draw/DrawBatcher.cpp
 
     # Immediate Mode
     src/immediate/Immediate.cpp

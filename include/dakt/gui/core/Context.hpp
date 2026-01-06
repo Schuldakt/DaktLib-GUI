@@ -1,7 +1,7 @@
 #ifndef DAKTLIB_GUI_CONTEXT_HPP
 #define DAKTLIB_GUI_CONTEXT_HPP
 
-#include "../style/Style.hpp"
+#include "../subsystems/style/Style.hpp"
 #include "Types.hpp"
 #include <memory>
 #include <vector>
@@ -12,6 +12,8 @@ class IRenderBackend;
 class DrawList;
 class LayoutNode;
 class InputSystem;
+
+struct ImmediateState;
 
 class Context {
   public:
@@ -32,6 +34,10 @@ class Context {
     DrawList& getDrawList();
     LayoutNode* getRootLayout();
 
+    // Immediate state
+    ImmediateState& getImmediateState();
+    const ImmediateState& getImmediateState() const;
+
   private:
     IRenderBackend* backend_;
     Theme theme_;
@@ -39,6 +45,7 @@ class Context {
     uint32_t frameCount_ = 0;
     std::unique_ptr<DrawList> drawList_;
     std::unique_ptr<LayoutNode> rootLayout_;
+    std::unique_ptr<ImmediateState> immediateState_;
 };
 
 } // namespace dakt::gui

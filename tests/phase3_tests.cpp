@@ -6,8 +6,8 @@
  */
 
 #include "dakt/gui/backend/IRenderBackend.hpp"
-#include "dakt/gui/draw/DrawBatcher.hpp"
-#include "dakt/gui/draw/DrawList.hpp"
+#include "dakt/gui/subsystems/draw/DrawBatcher.hpp"
+#include "dakt/gui/subsystems/draw/DrawList.hpp"
 
 #include <cassert>
 #include <cmath>

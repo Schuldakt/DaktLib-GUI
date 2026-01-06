@@ -1,7 +1,7 @@
 #ifndef DAKTLIB_GUI_DRAW_HPP
 #define DAKTLIB_GUI_DRAW_HPP
 
-#include "../core/Types.hpp"
+#include "../../core/Types.hpp"
 #include <vector>
 
 namespace dakt::gui {

@@ -1,7 +1,7 @@
 #ifndef DAKTLIB_GUI_LAYOUT_HPP
 #define DAKTLIB_GUI_LAYOUT_HPP
 
-#include "../core/Types.hpp"
+#include "../../core/Types.hpp"
 #include <limits>
 #include <memory>
 #include <vector>

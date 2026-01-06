@@ -1,20 +1,15 @@
-#ifndef DAKTLIB_GUI_IMMEDIATECONTEXT_HPP
-#define DAKTLIB_GUI_IMMEDIATECONTEXT_HPP
+#pragma once
 
-#include "../../core/Types.hpp"
+#include "dakt/gui/core/Types.hpp"
 
 namespace dakt::gui {
 
-// ============================================================================
-// Text
-// ============================================================================
+    DAKTLIB_GUI_API void text(const char* fmt, ...);
+    DAKTLIB_GUI_API void textColored(Color color, const char* fmt, ...);
+    DAKTLIB_GUI_API void textDisabled(const char* fmt, ...);
+    DAKTLIB_GUI_API void textWrapped(const char* fmt, ...);
 
-void text(const char* fmt, ...);
-void textColored(Color color, const char* fmt, ...);
-void textDisabled(const char* fmt, ...);
-void textWrapped(const char* fmt, ...);
-void labelText(const char* label, const char* fmt, ...);
+    // Label + value layout helper
+    DAKTLIB_GUI_API void labelText(const char* label, const char* fmt, ...);
 
 } // namespace dakt::gui
-
-#endif

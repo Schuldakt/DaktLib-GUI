@@ -1,7 +1,7 @@
 #ifndef DAKTLIB_GUI_VARIABLE_FONT_HPP
 #define DAKTLIB_GUI_VARIABLE_FONT_HPP
 
-#include "../core/Types.hpp"
+#include "../../core/Types.hpp"
 #include "TTFParser.hpp"
 #include <cstdint>
 #include <memory>
