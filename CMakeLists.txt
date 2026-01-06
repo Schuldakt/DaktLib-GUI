@@ -218,9 +218,7 @@ set(DAKTLIB_GUI_SOURCES
     src/backend/Backend.cpp
 
     # C API
-    src/c_api/Context.cpp
-    src/c_api/Input.cpp
-    src/c_api/Widgets.cpp
+    src/c_api/dakt_gui.cpp
 )
 
 # -----------------------------------------------------------------------------
@@ -381,6 +379,9 @@ install(TARGETS ${DAKTLIB_INSTALL_TARGETS}
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h"
 )
+
+# Install the C API header for consumers (ensures c_api.h is always present)
+install(FILES include/dakt/gui/c_api/c_api.h DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dakt/gui/c_api)
 
 install(FILES "${CMAKE_CURRENT_BINARY_DIR}/include/dakt/gui/Version.hpp"
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/dakt/gui

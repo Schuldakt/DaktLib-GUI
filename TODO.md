@@ -7,7 +7,7 @@ Built with C++23, CMake 4.2.1, releases for Windows (x86/x64), Linux, and macOS.
 
 | Phase | Description | Status |
 |-------|-------------|--------|
-| 0 | Project Scaffold & Build System | In Progress |
+| 0 | Project Scaffold & Build System | ✅ Complete |
 | 1 | Core Types, Layout, Input & DrawList | ✅ Complete |
 | 2 | Text Rendering & Font System | ✅ Complete |
 | 3 | Vulkan Backend & Shaders | ✅ Complete |
@@ -393,11 +393,11 @@ Container headers are now organized into a subdirectory:
 
 **Total Tasks: ~56 tracked items across 7 phases**
 
-- **Phase 0**: 15 tasks (scaffold, build, CI/CD, packaging)
+- **Phase 0**: ✅ COMPLETE — 15 tasks (scaffold, build, CI/CD, packaging)
 - **Phase 1**: ✅ COMPLETE — Core types, layout, styling, input, animation, immediate mode, draw commands, tests
 - **Phase 2**: ✅ COMPLETE — TTF/OTF parsing, variable fonts, SDF/MSDF generation, text shaping, glyph caching, text cursor
 - **Phase 3**: ✅ COMPLETE — 12 tasks (Vulkan backend, shaders)
-- **Phase 4**: 8 tasks (retained mode, advanced widgets)
+- **Phase 4**: ✅ COMPLETE — 8 tasks (retained mode, advanced widgets)
 - **Phase 5**: 10 tasks (C API, C# bindings)
 - **Phase 6**: 20+ tasks (additional backends, packaging, docs, testing)
 
