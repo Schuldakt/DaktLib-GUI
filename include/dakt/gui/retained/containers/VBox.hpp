@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_VBOX_HPP
-#define DAKT_GUI_VBOX_HPP
+#ifndef DAKTLIB_GUI_VBOX_HPP
+#define DAKTLIB_GUI_VBOX_HPP
 
 #include "ContainerBase.hpp"
 
@@ -8,7 +8,7 @@ namespace dakt::gui {
 /**
  * @brief Vertical box container - stacks children top to bottom
  */
-class DAKT_GUI_API VBox : public UIContainer {
+class DAKTLIB_GUI_API VBox : public UIContainer {
   public:
     VBox() : UIContainer() { setLayoutDirection(LayoutDirection::Vertical); }
 
@@ -27,4 +27,4 @@ class DAKT_GUI_API VBox : public UIContainer {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_VBOX_HPP
+#endif // DAKTLIB_GUI_VBOX_HPP

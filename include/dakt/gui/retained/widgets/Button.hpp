@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_BUTTON_HPP
-#define DAKT_GUI_BUTTON_HPP
+#ifndef DAKTLIB_GUI_BUTTON_HPP
+#define DAKTLIB_GUI_BUTTON_HPP
 
 #include "WidgetBase.hpp"
 
@@ -8,7 +8,7 @@ namespace dakt::gui {
 /**
  * @brief Clickable button widget
  */
-class DAKT_GUI_API Button : public Widget {
+class DAKTLIB_GUI_API Button : public Widget {
   public:
     Button();
     explicit Button(const std::string& label);
@@ -62,4 +62,4 @@ class DAKT_GUI_API Button : public Widget {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_BUTTON_HPP
+#endif // DAKTLIB_GUI_BUTTON_HPP

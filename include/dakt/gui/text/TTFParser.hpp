@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_TEXT_TTFPARSER_HPP
-#define DAKT_GUI_TEXT_TTFPARSER_HPP
+#ifndef DAKTLIB_GUI_TEXT_TTFPARSER_HPP
+#define DAKTLIB_GUI_TEXT_TTFPARSER_HPP
 
 #include <array>
 #include <cstdint>

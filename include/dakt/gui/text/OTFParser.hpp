@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_OTF_PARSER_HPP
-#define DAKT_GUI_OTF_PARSER_HPP
+#ifndef DAKTLIB_GUI_OTF_PARSER_HPP
+#define DAKTLIB_GUI_OTF_PARSER_HPP
 
 #include "TTFParser.hpp"
 #include <cstdint>

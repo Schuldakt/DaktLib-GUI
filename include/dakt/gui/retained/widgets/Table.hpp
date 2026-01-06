@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_TABLE_HPP
-#define DAKT_GUI_TABLE_HPP
+#ifndef DAKTLIB_GUI_TABLE_HPP
+#define DAKTLIB_GUI_TABLE_HPP
 
 #include "WidgetBase.hpp"
 #include <functional>
@@ -62,7 +62,7 @@ enum class TableSelectionMode { None, Single, Multiple };
  * - Custom cell rendering
  * - Tree table support (expandable rows)
  */
-class DAKT_GUI_API Table : public Widget {
+class DAKTLIB_GUI_API Table : public Widget {
   public:
     using CellRenderer = std::function<void(DrawList&, const Rect&, int row, int col, const TableCellValue&)>;
     using SortCallback = std::function<void(int column, SortDirection direction)>;
@@ -266,4 +266,4 @@ class DAKT_GUI_API Table : public Widget {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_TABLE_HPP
+#endif // DAKTLIB_GUI_TABLE_HPP

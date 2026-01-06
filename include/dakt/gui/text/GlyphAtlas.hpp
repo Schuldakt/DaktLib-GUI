@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_GLYPH_ATLAS_HPP
-#define DAKT_GUI_GLYPH_ATLAS_HPP
+#ifndef DAKTLIB_GUI_GLYPH_ATLAS_HPP
+#define DAKTLIB_GUI_GLYPH_ATLAS_HPP
 
 #include "../core/Types.hpp"
 #include <cstdint>

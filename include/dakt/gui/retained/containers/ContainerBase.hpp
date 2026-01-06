@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_CONTAINER_BASE_HPP
-#define DAKT_GUI_CONTAINER_BASE_HPP
+#ifndef DAKTLIB_GUI_CONTAINER_BASE_HPP
+#define DAKTLIB_GUI_CONTAINER_BASE_HPP
 
 #include "../widgets/WidgetBase.hpp"
 #include <functional>
@@ -46,7 +46,7 @@ enum class Alignment {
  * input routing, layout computation, and rendering via the immediate
  * mode API bridge.
  */
-class DAKT_GUI_API UIContainer {
+class DAKTLIB_GUI_API UIContainer {
   public:
     UIContainer();
     explicit UIContainer(const std::string& id);
@@ -194,4 +194,4 @@ class DAKT_GUI_API UIContainer {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_CONTAINER_BASE_HPP
+#endif // DAKTLIB_GUI_CONTAINER_BASE_HPP

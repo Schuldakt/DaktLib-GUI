@@ -1,60 +1,51 @@
 <?xml version="1.0" encoding="utf-8"?>
-<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
     <id>DaktLib.GUI</id>
-    <version>0.1.0</version>
+    <version>$VERSION$</version>
     <title>DaktLib GUI</title>
-    <authors>DaktLib Contributors</authors>
-    <owners>DaktLib</owners>
-    <licenseUrl>https://github.com/YOUR_ORG/DaktLib-GUI/blob/main/LICENSE</licenseUrl>
-    <projectUrl>https://github.com/YOUR_ORG/DaktLib-GUI</projectUrl>
+    <authors>Schuldakt</authors>
+    <license type="expression">MIT</license>
+    <projectUrl>https://github.com/Schuldakt/DaktLib</projectUrl>
+    <repository type="git" url="https://github.com/Schuldakt/DaktLib.git" />
     <description>
-      Zero-dependency immediate-first GUI library with optional retained mode widgets.
-      Features Vulkan-first rendering, native TrueType/OpenType font generation with variable font support,
-      flex-based layout, animations, and C# bindings via ClangSharp.
+      Zero-dependency, cross-platform GUI library with immediate and retained modes.
+      Supports DirectX 11/12, Vulkan, OpenGL 4.5+, and Metal backends.
+      Built with C++23 for Windows, Linux, and macOS.
     </description>
-    <releaseNotes>
-      Initial release 0.1.0 with core foundation, Vulkan backend, text rendering, and C# bindings.
-    </releaseNotes>
-    <tags>gui graphics vulkan font rendering cross-platform windows linux macos</tags>
-    <repository type="git" url="https://github.com/YOUR_ORG/DaktLib-GUI" />
-    <dependencies>
-      <!-- Zero external dependencies -->
-    </dependencies>
+    <summary>Cross-platform GUI library with multi-backend rendering</summary>
+    <releaseNotes>See https://github.com/Schuldakt/DaktLib/releases</releaseNotes>
+    <copyright>Copyright 2024-2025 Schuldakt</copyright>
+    <tags>gui imgui vulkan directx opengl metal cpp23 cross-platform native</tags>
+    <readme>docs/README.md</readme>
   </metadata>
-
+  
   <files>
-    <!-- Windows x86 native -->
-    <file src="artifacts/DaktLib-GUI.lib" target="native/win-x86/lib" />
-    <file src="artifacts/DaktLib-GUI.dll" target="native/win-x86/lib" />
-    <file src="include/**/*.hpp" target="native/win-x86/include" />
+    <!-- Headers -->
+    <file src="include/**/*.hpp" target="build/native/include" />
+    <file src="include/**/*.h" target="build/native/include" />
     
-    <!-- Windows x64 native -->
-    <file src="artifacts/DaktLib-GUI-x64.lib" target="native/win-x64/lib" />
-    <file src="artifacts/DaktLib-GUI-x64.dll" target="native/win-x64/lib" />
-    <file src="include/**/*.hpp" target="native/win-x64/include" />
+    <!-- Windows x64 -->
+    <file src="runtimes/win-x64/native/*.lib" target="runtimes/win-x64/native" />
+    <file src="runtimes/win-x64/native/*.dll" target="runtimes/win-x64/native" />
     
-    <!-- Linux x64 native -->
-    <file src="artifacts/libDaktLib-GUI.a" target="native/linux-x64/lib" />
-    <file src="artifacts/libDaktLib-GUI.so" target="native/linux-x64/lib" />
-    <file src="include/**/*.hpp" target="native/linux-x64/include" />
+    <!-- Windows x86 -->
+    <file src="runtimes/win-x86/native/*.lib" target="runtimes/win-x86/native" />
+    <file src="runtimes/win-x86/native/*.dll" target="runtimes/win-x86/native" />
     
-    <!-- macOS x64 native -->
-    <file src="artifacts/libDaktLib-GUI-x64.a" target="native/osx-x64/lib" />
-    <file src="artifacts/libDaktLib-GUI-x64.dylib" target="native/osx-x64/lib" />
-    <file src="include/**/*.hpp" target="native/osx-x64/include" />
+    <!-- Linux x64 -->
+    <file src="runtimes/linux-x64/native/*.a" target="runtimes/linux-x64/native" />
+    <file src="runtimes/linux-x64/native/*.so*" target="runtimes/linux-x64/native" />
     
-    <!-- macOS ARM64 native -->
-    <file src="artifacts/libDaktLib-GUI-arm64.a" target="native/osx-arm64/lib" />
-    <file src="artifacts/libDaktLib-GUI-arm64.dylib" target="native/osx-arm64/lib" />
-    <file src="include/**/*.hpp" target="native/osx-arm64/include" />
+    <!-- macOS x64 -->
+    <file src="runtimes/osx-x64/native/*.a" target="runtimes/osx-x64/native" />
+    <file src="runtimes/osx-x64/native/*.dylib" target="runtimes/osx-x64/native" />
     
-    <!-- C# bindings -->
-    <file src="bindings/csharp/bin/Release/**/DaktLib.GUI.dll" target="lib/net8.0" />
-    <file src="bindings/csharp/DaktLib.GUI.cs" target="lib/net8.0" />
+    <!-- macOS ARM64 -->
+    <file src="runtimes/osx-arm64/native/*.a" target="runtimes/osx-arm64/native" />
+    <file src="runtimes/osx-arm64/native/*.dylib" target="runtimes/osx-arm64/native" />
     
-    <!-- Documentation -->
-    <file src="README.md" target="README.md" />
-    <file src="LICENSE" target="LICENSE" />
+    <!-- Build targets for MSBuild integration -->
+    <file src="build/DaktLib.GUI.targets" target="build" />
   </files>
 </package>

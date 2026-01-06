@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_LABEL_HPP
-#define DAKT_GUI_LABEL_HPP
+#ifndef DAKTLIB_GUI_LABEL_HPP
+#define DAKTLIB_GUI_LABEL_HPP
 
 #include "WidgetBase.hpp"
 
@@ -8,7 +8,7 @@ namespace dakt::gui {
 /**
  * @brief Simple text label widget
  */
-class DAKT_GUI_API Label : public Widget {
+class DAKTLIB_GUI_API Label : public Widget {
   public:
     Label();
     explicit Label(const std::string& text);
@@ -39,4 +39,4 @@ class DAKT_GUI_API Label : public Widget {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_LABEL_HPP
+#endif // DAKTLIB_GUI_LABEL_HPP

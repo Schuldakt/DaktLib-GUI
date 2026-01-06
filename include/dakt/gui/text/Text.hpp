@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_TEXT_HPP
-#define DAKT_GUI_TEXT_HPP
+#ifndef DAKTLIB_GUI_TEXT_HPP
+#define DAKTLIB_GUI_TEXT_HPP
 
 #include "TextShaper.hpp"
 #include <map>

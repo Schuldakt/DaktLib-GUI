@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_SCROLL_VIEW_HPP
-#define DAKT_GUI_SCROLL_VIEW_HPP
+#ifndef DAKTLIB_GUI_SCROLL_VIEW_HPP
+#define DAKTLIB_GUI_SCROLL_VIEW_HPP
 
 #include "WidgetBase.hpp"
 
@@ -8,7 +8,7 @@ namespace dakt::gui {
 /**
  * @brief Scrollable container widget
  */
-class DAKT_GUI_API ScrollView : public Widget {
+class DAKTLIB_GUI_API ScrollView : public Widget {
   public:
     ScrollView();
 
@@ -74,4 +74,4 @@ class DAKT_GUI_API ScrollView : public Widget {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_SCROLL_VIEW_HPP
+#endif // DAKTLIB_GUI_SCROLL_VIEW_HPP

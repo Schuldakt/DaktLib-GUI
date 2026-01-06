@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_DRAW_HPP
-#define DAKT_GUI_DRAW_HPP
+#ifndef DAKTLIB_GUI_DRAW_HPP
+#define DAKTLIB_GUI_DRAW_HPP
 
 #include "../core/Types.hpp"
 #include <vector>
@@ -10,7 +10,7 @@ namespace dakt::gui {
 // Vertex Structure
 // ============================================================================
 
-struct DAKT_GUI_API Vertex {
+struct DAKTLIB_GUI_API Vertex {
     Vec2 position;
     Vec2 uv;
     Color color;
@@ -25,7 +25,7 @@ struct DAKT_GUI_API Vertex {
 
 enum class DrawCommandType { None, DrawTriangles, SetClipRect, SetTexture };
 
-struct DAKT_GUI_API DrawCommand {
+struct DAKTLIB_GUI_API DrawCommand {
     DrawCommandType type = DrawCommandType::None;
     uint32_t vertexOffset = 0;
     uint32_t vertexCount = 0;
@@ -39,7 +39,7 @@ struct DAKT_GUI_API DrawCommand {
 // Draw List
 // ============================================================================
 
-class DAKT_GUI_API DrawList {
+class DAKTLIB_GUI_API DrawList {
   public:
     DrawList();
     ~DrawList();

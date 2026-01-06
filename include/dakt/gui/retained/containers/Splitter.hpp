@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_SPLITTER_HPP
-#define DAKT_GUI_SPLITTER_HPP
+#ifndef DAKTLIB_GUI_SPLITTER_HPP
+#define DAKTLIB_GUI_SPLITTER_HPP
 
 #include "ContainerBase.hpp"
 
@@ -8,7 +8,7 @@ namespace dakt::gui {
 /**
  * @brief Splitter container - divides space between two children with draggable divider
  */
-class DAKT_GUI_API Splitter : public UIContainer {
+class DAKTLIB_GUI_API Splitter : public UIContainer {
   public:
     enum class Orientation {
         Horizontal, // Left/Right split
@@ -89,4 +89,4 @@ class DAKT_GUI_API Splitter : public UIContainer {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_SPLITTER_HPP
+#endif // DAKTLIB_GUI_SPLITTER_HPP

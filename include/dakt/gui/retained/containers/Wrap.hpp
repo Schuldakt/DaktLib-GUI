@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_WRAP_HPP
-#define DAKT_GUI_WRAP_HPP
+#ifndef DAKTLIB_GUI_WRAP_HPP
+#define DAKTLIB_GUI_WRAP_HPP
 
 #include "ContainerBase.hpp"
 
@@ -10,7 +10,7 @@ namespace dakt::gui {
  *
  * Similar to CSS flexbox with flex-wrap: wrap
  */
-class DAKT_GUI_API Wrap : public UIContainer {
+class DAKTLIB_GUI_API Wrap : public UIContainer {
   public:
     Wrap();
     explicit Wrap(const std::string& id);
@@ -60,4 +60,4 @@ class DAKT_GUI_API Wrap : public UIContainer {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_WRAP_HPP
+#endif // DAKTLIB_GUI_WRAP_HPP

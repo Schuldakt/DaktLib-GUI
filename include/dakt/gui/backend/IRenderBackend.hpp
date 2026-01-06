@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_IRENDER_BACKEND_HPP
-#define DAKT_GUI_IRENDER_BACKEND_HPP
+#ifndef DAKTLIB_GUI_IRENDER_BACKEND_HPP
+#define DAKTLIB_GUI_IRENDER_BACKEND_HPP
 
 #include "../core/Types.hpp"
 #include <cstdint>
@@ -78,7 +78,7 @@ struct BackendCapabilities {
 // Render Backend Interface
 // ============================================================================
 
-class DAKT_GUI_API IRenderBackend {
+class DAKTLIB_GUI_API IRenderBackend {
   public:
     virtual ~IRenderBackend() = default;
 
@@ -126,4 +126,4 @@ std::unique_ptr<IRenderBackend> createOpenGLBackend();
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_IRENDER_BACKEND_HPP
+#endif // DAKTLIB_GUI_IRENDER_BACKEND_HPP

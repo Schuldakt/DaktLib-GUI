@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_CHECKBOX_HPP
-#define DAKT_GUI_CHECKBOX_HPP
+#ifndef DAKTLIB_GUI_CHECKBOX_HPP
+#define DAKTLIB_GUI_CHECKBOX_HPP
 
 #include "WidgetBase.hpp"
 
@@ -8,7 +8,7 @@ namespace dakt::gui {
 /**
  * @brief Checkbox toggle widget
  */
-class DAKT_GUI_API Checkbox : public Widget {
+class DAKTLIB_GUI_API Checkbox : public Widget {
   public:
     Checkbox();
     explicit Checkbox(const std::string& label);
@@ -44,4 +44,4 @@ class DAKT_GUI_API Checkbox : public Widget {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_CHECKBOX_HPP
+#endif // DAKTLIB_GUI_CHECKBOX_HPP

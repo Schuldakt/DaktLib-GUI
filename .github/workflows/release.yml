@@ -1,202 +1,192 @@
+# =============================================================================
+# DaktLib-GUI — Release Workflow
+# =============================================================================
+
 name: Release
 
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 0.1.0)'
+        required: true
+        type: string
 
 env:
-  CMAKE_VERSION: 4.21
-  NINJA_VERSION: 1.11
+  CMAKE_VERSION: "4.2.1"
   BUILD_TYPE: Release
 
 jobs:
-  build-all-platforms:
+  build-all:
+    name: Build ${{ matrix.rid }}
+    runs-on: ${{ matrix.runner }}
+    
     strategy:
       fail-fast: false
       matrix:
         include:
-          - name: Windows x86
-            runner-labels: "self-hosted,windows,x86"
-            arch: win-x86
-            toolchain: toolchains/windows-x86.cmake
-            artifact-prefix: ""
-            lib-ext: ".lib"
-
-          - name: Windows x64
-            runner-labels: "self-hosted,windows,x64"
-            arch: win-x64
-            toolchain: toolchains/windows-x64.cmake
-            artifact-prefix: ""
-            lib-ext: ".lib"
-
-          - name: Linux x64
-            runner-labels: "self-hosted,linux,x64"
-            arch: linux-x64
-            toolchain: toolchains/linux-x64.cmake
-            artifact-prefix: "lib"
-            lib-ext: ".a"
-
-          - name: macOS x64
-            runner-labels: "self-hosted,macos,x64"
-            arch: osx-x64
-            toolchain: toolchains/macos-x64.cmake
-            artifact-prefix: "lib"
-            lib-ext: ".a"
-
-          - name: macOS ARM64
-            runner-labels: "self-hosted,macos,arm64"
-            arch: osx-arm64
-            toolchain: toolchains/macos-arm64.cmake
-            artifact-prefix: "lib"
-            lib-ext: ".a"
-
-    name: Build ${{ matrix.name }}
-    runs-on: ${{ matrix.runner-labels }}
+          - rid: win-x64
+            os: windows
+            runner: windows-latest
+            cmake_arch: x64
+          - rid: win-x86
+            os: windows
+            runner: windows-latest
+            cmake_arch: Win32
+          - rid: linux-x64
+            os: linux
+            runner: ubuntu-24.04
+          - rid: osx-x64
+            os: macos
+            runner: macos-13
+          - rid: osx-arm64
+            os: macos
+            runner: macos-14
 
     steps:
       - uses: actions/checkout@v4
-
-      - name: Install dependencies (Ubuntu)
-        if: runner.os == 'Linux'
+        with:
+          submodules: recursive
+          
+      - uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: ${{ env.CMAKE_VERSION }}
+          
+      - name: Setup MSVC
+        if: matrix.os == 'windows'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.cmake_arch == 'Win32' && 'x86' || 'x64' }}
+          
+      - name: Install Dependencies (Linux)
+        if: matrix.os == 'linux'
         run: |
-          sudo apt update
-          sudo apt install -y cmake ninja-build clang vulkan-sdk
-
-      - name: Install dependencies (macOS)
-        if: runner.os == 'macOS'
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libvulkan-dev
+          
+      - name: Install Dependencies (macOS)
+        if: matrix.os == 'macos'
+        run: brew install ninja
+        
+      - name: Setup Vulkan SDK
+        if: matrix.os != 'macos'
+        uses: humbletim/setup-vulkan-sdk@v1.2.0
+        with:
+          vulkan-query-version: 1.3.290.0
+          vulkan-components: Vulkan-Headers, Vulkan-Loader
+          vulkan-use-cache: true
+          
+      - name: Configure (Windows)
+        if: matrix.os == 'windows'
         run: |
-          brew install cmake ninja vulkan-sdk
-
-      - name: Configure CMake
+          cmake -S . -B build `
+            -G "Visual Studio 17 2022" `
+            -A ${{ matrix.cmake_arch }} `
+            -DDAKT_GUI_BUILD_SHARED=ON `
+            -DDAKT_GUI_BUILD_STATIC=ON
+            
+      - name: Configure (Unix)
+        if: matrix.os != 'windows'
         run: |
-          cmake -S . -B build -G "Ninja" \
+          cmake -S . -B build \
+            -G Ninja \
             -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-            -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} \
-            -DDAKT_GUI_BUILD_TESTS=ON \
-            -DDAKT_GUI_BUILD_SHOWCASE=ON
-
+            -DDAKT_GUI_BUILD_SHARED=ON \
+            -DDAKT_GUI_BUILD_STATIC=ON
+            
       - name: Build
-        run: ninja -C build
-
-      - name: Run tests
-        run: ctest --output-on-failure -C ${{ env.BUILD_TYPE }}
-        working-directory: build
-
-      - name: Create artifact directory
-        run: |
-          mkdir -p release-artifacts/${{ matrix.arch }}/lib
-          mkdir -p release-artifacts/${{ matrix.arch }}/include
-
-      - name: Gather artifacts
-        shell: bash
-        run: |
-          cp build/lib/${{ matrix.artifact-prefix }}DaktLib-GUI* \
-             release-artifacts/${{ matrix.arch }}/lib/ || true
-          cp -r include/dakt \
-             release-artifacts/${{ matrix.arch }}/include/ || true
-          cp -r bindings/csharp/*.cs \
-             release-artifacts/${{ matrix.arch }}/ || true
-
-      - name: Upload release artifacts
-        uses: actions/upload-artifact@v3
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+        
+      - name: Install
+        run: cmake --install build --config ${{ env.BUILD_TYPE }} --prefix staging/${{ matrix.rid }}
+        
+      - name: Upload Staging
+        uses: actions/upload-artifact@v4
         with:
-          name: release-${{ matrix.arch }}
-          path: release-artifacts/
+          name: staging-${{ matrix.rid }}
+          path: staging/${{ matrix.rid }}/
 
-  create-nuget:
-    needs: build-all-platforms
+  package-nuget:
+    name: Package NuGet
+    needs: build-all
     runs-on: ubuntu-latest
-
+    
     steps:
       - uses: actions/checkout@v4
-
-      - name: Download all artifacts
-        uses: actions/download-artifact@v3
+      
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
         with:
-          path: artifacts
-
-      - name: Organize artifacts for NuGet
-        shell: bash
+          path: artifacts/
+          pattern: staging-*
+          
+      - name: Prepare NuGet Structure
         run: |
-          mkdir -p nuget-staging/{native,lib/net8.0}
+          VERSION="${{ github.event.inputs.version || github.ref_name }}"
+          VERSION="${VERSION#v}"  # Remove 'v' prefix if present
           
-          # Copy natives per RID
-          for rid in win-x86 win-x64 linux-x64 osx-x64 osx-arm64; do
-            mkdir -p nuget-staging/native/$rid/{lib,include}
-            cp -r artifacts/release-$rid/$rid/lib/* nuget-staging/native/$rid/lib/ || true
-            cp -r artifacts/release-$rid/$rid/include/* nuget-staging/native/$rid/include/ || true
-          done
+          mkdir -p nuget/runtimes/{win-x64,win-x86,linux-x64,osx-x64,osx-arm64}/native
+          mkdir -p nuget/build
           
-          # Copy C# bindings
-          cp artifacts/release-win-x64/win-x64/*.dll nuget-staging/lib/net8.0/ || true
-          cp artifacts/release-win-x64/win-x64/*.cs nuget-staging/lib/net8.0/ || true
-
-      - name: Create NuGet package
+          # Copy native libraries
+          cp -r artifacts/staging-win-x64/lib/* nuget/runtimes/win-x64/native/ || true
+          cp -r artifacts/staging-win-x86/lib/* nuget/runtimes/win-x86/native/ || true
+          cp -r artifacts/staging-linux-x64/lib/* nuget/runtimes/linux-x64/native/ || true
+          cp -r artifacts/staging-osx-x64/lib/* nuget/runtimes/osx-x64/native/ || true
+          cp -r artifacts/staging-osx-arm64/lib/* nuget/runtimes/osx-arm64/native/ || true
+          
+          # Copy headers (from any platform, they're the same)
+          cp -r artifacts/staging-linux-x64/include nuget/ || cp -r artifacts/staging-win-x64/include nuget/
+          
+          # Generate .nuspec with correct version
+          sed "s/\$VERSION\$/${VERSION}/g" DaktLib.GUI.nuspec > nuget/DaktLib.GUI.nuspec
+          
+      - name: Pack NuGet
         run: |
-          # Install nuget CLI
-          dotnet tool install -g nuget.commandline
+          cd nuget
+          nuget pack DaktLib.GUI.nuspec
           
-          # Get version from tag
-          VERSION=${GITHUB_REF#refs/tags/v}
-          
-          # Update nuspec with version
-          sed -i "s/<version>0.1.0<\/version>/<version>$VERSION<\/version>/" DaktLib.GUI.nuspec
-          
-          # Pack
-          nuget pack DaktLib.GUI.nuspec -OutputDirectory ./nuget-package
-
-      - name: Upload NuGet package
-        uses: actions/upload-artifact@v3
+      - name: Upload NuGet Package
+        uses: actions/upload-artifact@v4
         with:
           name: nuget-package
-          path: nuget-package/*.nupkg
-
-      - name: Publish to NuGet
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/v}
-          nuget push nuget-package/DaktLib.GUI.$VERSION.nupkg \
-            -ApiKey ${{ secrets.NUGET_API_KEY }} \
-            -Source https://api.nuget.org/v3/index.json
+          path: nuget/*.nupkg
 
   create-release:
-    needs: create-nuget
+    name: Create GitHub Release
+    needs: [build-all, package-nuget]
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: write
+      
     steps:
       - uses: actions/checkout@v4
-
-      - name: Download artifacts
-        uses: actions/download-artifact@v3
+      
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
         with:
-          path: release-artifacts
-
-      - name: Create GitHub Release
+          path: artifacts/
+          
+      - name: Create Archives
+        run: |
+          VERSION="${{ github.event.inputs.version || github.ref_name }}"
+          VERSION="${VERSION#v}"
+          
+          cd artifacts
+          for dir in staging-*/; do
+            rid=$(basename "$dir" | sed 's/staging-//')
+            tar -czvf "daktlib-gui-${VERSION}-${rid}.tar.gz" -C "$dir" .
+          done
+          
+      - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
+          name: DaktLib-GUI v${{ github.event.inputs.version || github.ref_name }}
+          draft: true
+          generate_release_notes: true
           files: |
-            release-artifacts/**/*.nupkg
-            release-artifacts/**/*.lib
-            release-artifacts/**/*.a
-            release-artifacts/**/*.dll
-            release-artifacts/**/*.so
-            release-artifacts/**/*.dylib
-          body: |
-            # DaktLib-GUI Release ${{ github.ref }}
-            
-            Cross-platform immediate-first GUI library with Vulkan rendering.
-            
-            **Platforms:**
-            - Windows x86/x64
-            - Linux x64
-            - macOS x64 (Intel) / ARM64 (Apple Silicon)
-            
-            **Included:**
-            - Static libraries for each platform
-            - C++ headers
-            - C# bindings via NuGet
-            - Vulkan backend with pre-compiled SPIR-V shaders
-            
-            Install from NuGet: `Install-Package DaktLib.GUI -Version <version>`
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            artifacts/*.tar.gz
+            artifacts/nuget-package/*.nupkg

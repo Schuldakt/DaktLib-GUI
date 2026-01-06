@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_SLIDER_HPP
-#define DAKT_GUI_SLIDER_HPP
+#ifndef DAKTLIB_GUI_SLIDER_HPP
+#define DAKTLIB_GUI_SLIDER_HPP
 
 #include "WidgetBase.hpp"
 
@@ -8,7 +8,7 @@ namespace dakt::gui {
 /**
  * @brief Slider widget for numeric values
  */
-class DAKT_GUI_API Slider : public Widget {
+class DAKTLIB_GUI_API Slider : public Widget {
   public:
     Slider();
     Slider(float min, float max, float value = 0.0f);
@@ -85,4 +85,4 @@ class DAKT_GUI_API Slider : public Widget {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_SLIDER_HPP
+#endif // DAKTLIB_GUI_SLIDER_HPP

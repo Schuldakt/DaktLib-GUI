@@ -3,7 +3,7 @@
  * @brief Vulkan resource management (buffers, textures, memory)
  */
 
-#if defined(DAKT_ENABLE_VULKAN) || defined(__linux__) || defined(_WIN32)
+#if defined(DAKTLIB_ENABLE_VULKAN) || defined(__linux__) || defined(_WIN32)
 
 #include "dakt/gui/backend/vulkan/VulkanBackend.hpp"
 #include <cstring>

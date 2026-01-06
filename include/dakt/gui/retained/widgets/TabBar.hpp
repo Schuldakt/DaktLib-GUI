@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_TAB_BAR_HPP
-#define DAKT_GUI_TAB_BAR_HPP
+#ifndef DAKTLIB_GUI_TAB_BAR_HPP
+#define DAKTLIB_GUI_TAB_BAR_HPP
 
 #include "WidgetBase.hpp"
 
@@ -8,7 +8,7 @@ namespace dakt::gui {
 /**
  * @brief Tab bar with multiple tabs
  */
-class DAKT_GUI_API TabBar : public Widget {
+class DAKTLIB_GUI_API TabBar : public Widget {
   public:
     struct Tab {
         std::string label;
@@ -88,4 +88,4 @@ class DAKT_GUI_API TabBar : public Widget {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_TAB_BAR_HPP
+#endif // DAKTLIB_GUI_TAB_BAR_HPP

@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_GRID_HPP
-#define DAKT_GUI_GRID_HPP
+#ifndef DAKTLIB_GUI_GRID_HPP
+#define DAKTLIB_GUI_GRID_HPP
 
 #include "ContainerBase.hpp"
 
@@ -8,7 +8,7 @@ namespace dakt::gui {
 /**
  * @brief Grid container - arranges children in rows and columns
  */
-class DAKT_GUI_API Grid : public UIContainer {
+class DAKTLIB_GUI_API Grid : public UIContainer {
   public:
     Grid();
     explicit Grid(const std::string& id);
@@ -76,4 +76,4 @@ class DAKT_GUI_API Grid : public UIContainer {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_GRID_HPP
+#endif // DAKTLIB_GUI_GRID_HPP

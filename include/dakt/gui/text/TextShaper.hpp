@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_TEXT_SHAPER_HPP
-#define DAKT_GUI_TEXT_SHAPER_HPP
+#ifndef DAKTLIB_GUI_TEXT_SHAPER_HPP
+#define DAKTLIB_GUI_TEXT_SHAPER_HPP
 
 #include "../core/Types.hpp"
 #include <cstdint>

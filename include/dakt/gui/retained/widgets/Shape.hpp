@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_SHAPE_HPP
-#define DAKT_GUI_SHAPE_HPP
+#ifndef DAKTLIB_GUI_SHAPE_HPP
+#define DAKTLIB_GUI_SHAPE_HPP
 
 #include "WidgetBase.hpp"
 #include <cmath>
@@ -14,7 +14,7 @@ enum class ShapeType { Rectangle, RoundedRectangle, Circle, Ellipse, Triangle, P
 /**
  * @brief Base shape widget for geometric shapes
  */
-class DAKT_GUI_API Shape : public Widget {
+class DAKTLIB_GUI_API Shape : public Widget {
   public:
     Shape();
     explicit Shape(ShapeType type);
@@ -88,7 +88,7 @@ class DAKT_GUI_API Shape : public Widget {
 /**
  * @brief Hexagon shape widget
  */
-class DAKT_GUI_API Hexagon : public Shape {
+class DAKTLIB_GUI_API Hexagon : public Shape {
   public:
     Hexagon();
     explicit Hexagon(float size);
@@ -110,7 +110,7 @@ class DAKT_GUI_API Hexagon : public Shape {
 /**
  * @brief Circle shape widget
  */
-class DAKT_GUI_API Circle : public Shape {
+class DAKTLIB_GUI_API Circle : public Shape {
   public:
     Circle();
     explicit Circle(float radius);
@@ -138,7 +138,7 @@ class DAKT_GUI_API Circle : public Shape {
 /**
  * @brief Triangle shape widget
  */
-class DAKT_GUI_API Triangle : public Shape {
+class DAKTLIB_GUI_API Triangle : public Shape {
   public:
     enum class TriangleType { Equilateral, Isosceles, Right, Custom };
 
@@ -166,7 +166,7 @@ class DAKT_GUI_API Triangle : public Shape {
 /**
  * @brief Star shape widget
  */
-class DAKT_GUI_API Star : public Shape {
+class DAKTLIB_GUI_API Star : public Shape {
   public:
     Star();
     Star(int points, float outerRadius, float innerRadius);
@@ -192,7 +192,7 @@ class DAKT_GUI_API Star : public Shape {
 /**
  * @brief Pentagon shape widget
  */
-class DAKT_GUI_API Pentagon : public Shape {
+class DAKTLIB_GUI_API Pentagon : public Shape {
   public:
     Pentagon();
     explicit Pentagon(float size);
@@ -205,7 +205,7 @@ class DAKT_GUI_API Pentagon : public Shape {
 /**
  * @brief Octagon shape widget
  */
-class DAKT_GUI_API Octagon : public Shape {
+class DAKTLIB_GUI_API Octagon : public Shape {
   public:
     Octagon();
     explicit Octagon(float size);
@@ -218,7 +218,7 @@ class DAKT_GUI_API Octagon : public Shape {
 /**
  * @brief Diamond/Rhombus shape widget
  */
-class DAKT_GUI_API Diamond : public Shape {
+class DAKTLIB_GUI_API Diamond : public Shape {
   public:
     Diamond();
     explicit Diamond(float size);
@@ -231,7 +231,7 @@ class DAKT_GUI_API Diamond : public Shape {
 /**
  * @brief Arrow shape widget
  */
-class DAKT_GUI_API Arrow : public Shape {
+class DAKTLIB_GUI_API Arrow : public Shape {
   public:
     enum class ArrowDirection { Up, Down, Left, Right };
 
@@ -268,7 +268,7 @@ class DAKT_GUI_API Arrow : public Shape {
 /**
  * @brief Cross/Plus shape widget
  */
-class DAKT_GUI_API Cross : public Shape {
+class DAKTLIB_GUI_API Cross : public Shape {
   public:
     Cross();
     explicit Cross(float size);
@@ -289,4 +289,4 @@ class DAKT_GUI_API Cross : public Shape {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_SHAPE_HPP
+#endif // DAKTLIB_GUI_SHAPE_HPP

@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_TYPES_HPP
-#define DAKT_GUI_TYPES_HPP
+#ifndef DAKTLIB_GUI_TYPES_HPP
+#define DAKTLIB_GUI_TYPES_HPP
 
 #include <array>
 #include <cstddef>
@@ -11,21 +11,21 @@
 // Export Macros
 // ============================================================================
 
-#if defined(DAKT_GUI_STATIC)
-#define DAKT_GUI_API
-#elif defined(DAKT_GUI_EXPORTS)
+#if defined(DAKTLIB_GUI_STATIC)
+#define DAKTLIB_GUI_API
+#elif defined(DAKTLIB_GUI_EXPORTS)
 #if defined(_WIN32)
-#define DAKT_GUI_API __declspec(dllexport)
+#define DAKTLIB_GUI_API __declspec(dllexport)
 #elif defined(__GNUC__) || defined(__clang__)
-#define DAKT_GUI_API __attribute__((visibility("default")))
+#define DAKTLIB_GUI_API __attribute__((visibility("default")))
 #else
-#define DAKT_GUI_API
+#define DAKTLIB_GUI_API
 #endif
 #else
 #if defined(_WIN32)
-#define DAKT_GUI_API __declspec(dllimport)
+#define DAKTLIB_GUI_API __declspec(dllimport)
 #else
-#define DAKT_GUI_API
+#define DAKTLIB_GUI_API
 #endif
 #endif
 
@@ -44,7 +44,7 @@ ID generateID(uint64_t value);
 // Vectors & Math
 // ============================================================================
 
-struct DAKT_GUI_API Vec2 {
+struct DAKTLIB_GUI_API Vec2 {
     float x = 0.0f;
     float y = 0.0f;
 
@@ -83,7 +83,7 @@ struct DAKT_GUI_API Vec2 {
     static Vec2 lerp(const Vec2& a, const Vec2& b, float t) { return Vec2(a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t); }
 };
 
-struct DAKT_GUI_API Vec2i {
+struct DAKTLIB_GUI_API Vec2i {
     int32_t x = 0;
     int32_t y = 0;
 
@@ -98,7 +98,7 @@ struct DAKT_GUI_API Vec2i {
     Vec2 toFloat() const { return Vec2(static_cast<float>(x), static_cast<float>(y)); }
 };
 
-struct DAKT_GUI_API Vec3 {
+struct DAKTLIB_GUI_API Vec3 {
     float x = 0.0f;
     float y = 0.0f;
     float z = 0.0f;
@@ -125,7 +125,7 @@ struct DAKT_GUI_API Vec3 {
 // Colors
 // ============================================================================
 
-struct DAKT_GUI_API Color {
+struct DAKTLIB_GUI_API Color {
     uint8_t r = 255;
     uint8_t g = 255;
     uint8_t b = 255;
@@ -169,7 +169,7 @@ struct DAKT_GUI_API Color {
 // Forward declaration
 struct EdgeInsets;
 
-struct DAKT_GUI_API Rect {
+struct DAKTLIB_GUI_API Rect {
     float x = 0.0f;
     float y = 0.0f;
     float width = 0.0f;
@@ -367,4 +367,4 @@ struct Shadow {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_TYPES_HPP
+#endif // DAKTLIB_GUI_TYPES_HPP

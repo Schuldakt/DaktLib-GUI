@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_STYLE_HPP
-#define DAKT_GUI_STYLE_HPP
+#ifndef DAKTLIB_GUI_STYLE_HPP
+#define DAKTLIB_GUI_STYLE_HPP
 
 #include "../core/Types.hpp"
 #include <string>
@@ -11,7 +11,7 @@ namespace dakt::gui {
 // Style Properties
 // ============================================================================
 
-struct DAKT_GUI_API WidgetStyle {
+struct DAKTLIB_GUI_API WidgetStyle {
     // Background
     Color backgroundColor = Color(40, 40, 40, 255);
     Color backgroundColorHover = Color(60, 60, 60, 255);
@@ -50,7 +50,7 @@ struct DAKT_GUI_API WidgetStyle {
 // Color Scheme (semantic colors)
 // ============================================================================
 
-struct DAKT_GUI_API ColorScheme {
+struct DAKTLIB_GUI_API ColorScheme {
     // Primary colors
     Color primary = Color(66, 133, 244, 255); // Blue
     Color primaryHover = Color(88, 155, 255, 255);
@@ -86,7 +86,7 @@ struct DAKT_GUI_API ColorScheme {
 // Typography
 // ============================================================================
 
-struct DAKT_GUI_API Typography {
+struct DAKTLIB_GUI_API Typography {
     std::string fontFamily = "system-ui";
 
     float fontSizeH1 = 32.0f;
@@ -105,7 +105,7 @@ struct DAKT_GUI_API Typography {
 // Spacing Scale
 // ============================================================================
 
-struct DAKT_GUI_API SpacingScale {
+struct DAKTLIB_GUI_API SpacingScale {
     float xs = 4.0f;
     float sm = 8.0f;
     float md = 16.0f;
@@ -118,7 +118,7 @@ struct DAKT_GUI_API SpacingScale {
 // Theme
 // ============================================================================
 
-class DAKT_GUI_API Theme {
+class DAKTLIB_GUI_API Theme {
   public:
     Theme();
     ~Theme();

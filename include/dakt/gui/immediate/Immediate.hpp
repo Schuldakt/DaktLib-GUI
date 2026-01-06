@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_IMMEDIATE_HPP
-#define DAKT_GUI_IMMEDIATE_HPP
+#ifndef DAKTLIB_GUI_IMMEDIATE_HPP
+#define DAKTLIB_GUI_IMMEDIATE_HPP
 
 #include "../core/Types.hpp"
 #include <string>

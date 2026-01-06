@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  
+  <PropertyGroup>
+    <DaktLibGUIRuntimePath>$(MSBuildThisFileDirectory)..\runtimes\$(RuntimeIdentifier)\native\</DaktLibGUIRuntimePath>
+    <DaktLibGUIIncludePath>$(MSBuildThisFileDirectory)native\include\</DaktLibGUIIncludePath>
+  </PropertyGroup>
+  
+  <!-- Include directories -->
+  <ItemGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(DaktLibGUIIncludePath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemGroup>
+  
+  <!-- Library directories -->
+  <ItemGroup>
+    <Link>
+      <AdditionalLibraryDirectories>$(DaktLibGUIRuntimePath);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemGroup>
+  
+  <!-- Copy native DLLs to output -->
+  <ItemGroup Condition="'$(RuntimeIdentifier)' == 'win-x64' Or '$(RuntimeIdentifier)' == 'win-x86'">
+    <None Include="$(DaktLibGUIRuntimePath)*.dll">
+      <Link>%(Filename)%(Extension)</Link>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+  
+</Project>

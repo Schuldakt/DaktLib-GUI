@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_UICONTAINER_HPP
-#define DAKT_GUI_UICONTAINER_HPP
+#ifndef DAKTLIB_GUI_UICONTAINER_HPP
+#define DAKTLIB_GUI_UICONTAINER_HPP
 
 /**
  * @file UIContainer.hpp
@@ -16,4 +16,4 @@
 // Also include widgets for backward compatibility (UIContainer uses Widget)
 #include "Widgets.hpp"
 
-#endif // DAKT_GUI_UICONTAINER_HPP
+#endif // DAKTLIB_GUI_UICONTAINER_HPP

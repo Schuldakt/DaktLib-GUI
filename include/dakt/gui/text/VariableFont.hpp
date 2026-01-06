@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_VARIABLE_FONT_HPP
-#define DAKT_GUI_VARIABLE_FONT_HPP
+#ifndef DAKTLIB_GUI_VARIABLE_FONT_HPP
+#define DAKTLIB_GUI_VARIABLE_FONT_HPP
 
 #include "../core/Types.hpp"
 #include "TTFParser.hpp"

@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_COLOR_PICKER_HPP
-#define DAKT_GUI_COLOR_PICKER_HPP
+#ifndef DAKTLIB_GUI_COLOR_PICKER_HPP
+#define DAKTLIB_GUI_COLOR_PICKER_HPP
 
 #include "WidgetBase.hpp"
 
@@ -16,7 +16,7 @@ namespace dakt::gui {
  * - Hex color input
  * - Color preview
  */
-class DAKT_GUI_API ColorPicker : public Widget {
+class DAKTLIB_GUI_API ColorPicker : public Widget {
   public:
     enum class Mode {
         HSV,  // Hue-Saturation-Value
@@ -129,4 +129,4 @@ class DAKT_GUI_API ColorPicker : public Widget {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_COLOR_PICKER_HPP
+#endif // DAKTLIB_GUI_COLOR_PICKER_HPP

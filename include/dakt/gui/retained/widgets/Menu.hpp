@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_MENU_HPP
-#define DAKT_GUI_MENU_HPP
+#ifndef DAKTLIB_GUI_MENU_HPP
+#define DAKTLIB_GUI_MENU_HPP
 
 #include "WidgetBase.hpp"
 #include <vector>
@@ -51,7 +51,7 @@ struct MenuItem {
 /**
  * @brief Popup menu that can be shown anywhere
  */
-class DAKT_GUI_API Menu : public Widget {
+class DAKTLIB_GUI_API Menu : public Widget {
   public:
     Menu();
     explicit Menu(const std::string& title);
@@ -115,7 +115,7 @@ class DAKT_GUI_API Menu : public Widget {
 /**
  * @brief Horizontal menu bar (File, Edit, View, etc.)
  */
-class DAKT_GUI_API MenuBar : public Widget {
+class DAKTLIB_GUI_API MenuBar : public Widget {
   public:
     MenuBar();
 
@@ -159,7 +159,7 @@ class DAKT_GUI_API MenuBar : public Widget {
 /**
  * @brief Context menu (right-click menu)
  */
-class DAKT_GUI_API ContextMenu : public Menu {
+class DAKTLIB_GUI_API ContextMenu : public Menu {
   public:
     ContextMenu();
 
@@ -177,7 +177,7 @@ class DAKT_GUI_API ContextMenu : public Menu {
 /**
  * @brief Popup window that can contain any widgets
  */
-class DAKT_GUI_API Popup : public Widget {
+class DAKTLIB_GUI_API Popup : public Widget {
   public:
     enum class Anchor { TopLeft, TopCenter, TopRight, CenterLeft, Center, CenterRight, BottomLeft, BottomCenter, BottomRight };
 
@@ -256,7 +256,7 @@ class DAKT_GUI_API Popup : public Widget {
 /**
  * @brief Tooltip popup that appears on hover
  */
-class DAKT_GUI_API Tooltip : public Widget {
+class DAKTLIB_GUI_API Tooltip : public Widget {
   public:
     Tooltip();
     explicit Tooltip(const std::string& text);
@@ -298,4 +298,4 @@ class DAKT_GUI_API Tooltip : public Widget {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_MENU_HPP
+#endif // DAKTLIB_GUI_MENU_HPP

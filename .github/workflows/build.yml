@@ -1,113 +1,173 @@
+# =============================================================================
+# DaktLib-GUI — CI Build Workflow
+# =============================================================================
+
 name: Build
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main]
+  workflow_dispatch:
 
 env:
-  CMAKE_VERSION: 4.21
-  NINJA_VERSION: 1.11
+  CMAKE_VERSION: "4.2.1"
   BUILD_TYPE: Release
 
 jobs:
-  build-matrix:
+  build:
+    name: ${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.compiler }}
+    runs-on: ${{ matrix.runner }}
+    
     strategy:
       fail-fast: false
       matrix:
         include:
-          # Windows x86
-          - name: Windows x86
-            os: windows-2022
-            runner-labels: "self-hosted,windows,x86"
+          # Windows x64 (MSVC)
+          - os: windows
+            arch: x64
+            compiler: msvc
+            runner: windows-latest
+            cmake_generator: "Visual Studio 17 2022"
+            cmake_arch: x64
+            
+          # Windows x86 (MSVC)
+          - os: windows
             arch: x86
-            toolchain: toolchains/windows-x86.cmake
-            artifact-dir: build\bin\Release
-
-          # Windows x64
-          - name: Windows x64
-            os: windows-2022
-            runner-labels: "self-hosted,windows,x64"
+            compiler: msvc
+            runner: windows-latest
+            cmake_generator: "Visual Studio 17 2022"
+            cmake_arch: Win32
+            
+          # Windows x64 (Clang)
+          - os: windows
             arch: x64
-            toolchain: toolchains/windows-x64.cmake
-            artifact-dir: build\bin\Release
-
-          # Linux x64
-          - name: Linux x64
-            os: ubuntu-latest
-            runner-labels: "self-hosted,linux,x64"
+            compiler: clang
+            runner: windows-latest
+            cmake_generator: Ninja
+            
+          # Linux x64 (GCC)
+          - os: linux
             arch: x64
-            toolchain: toolchains/linux-x64.cmake
-            artifact-dir: build/bin
-
-          # macOS x64
-          - name: macOS x64
-            os: macos-latest
-            runner-labels: "self-hosted,macos,x64"
+            compiler: gcc
+            runner: ubuntu-24.04
+            cmake_generator: Ninja
+            packages: ninja-build libvulkan-dev
+            
+          # Linux x64 (Clang)
+          - os: linux
             arch: x64
-            toolchain: toolchains/macos-x64.cmake
-            artifact-dir: build/bin
-
-          # macOS ARM64
-          - name: macOS ARM64
-            os: macos-latest-xlarge
-            runner-labels: "self-hosted,macos,arm64"
+            compiler: clang
+            runner: ubuntu-24.04
+            cmake_generator: Ninja
+            packages: ninja-build clang-18 libvulkan-dev
+            cc: clang-18
+            cxx: clang++-18
+            
+          # macOS x64 (Apple Clang)
+          - os: macos
+            arch: x64
+            compiler: appleclang
+            runner: macos-13
+            cmake_generator: Ninja
+            packages: ninja
+            
+          # macOS ARM64 (Apple Clang)
+          - os: macos
             arch: arm64
-            toolchain: toolchains/macos-arm64.cmake
-            artifact-dir: build/bin
-
-    name: ${{ matrix.name }}
-    runs-on: ${{ matrix.runner-labels }}
+            compiler: appleclang
+            runner: macos-14
+            cmake_generator: Ninja
+            packages: ninja
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Install dependencies (Ubuntu)
-        if: runner.os == 'Linux'
-        run: |
-          sudo apt update
-          sudo apt install -y cmake ninja-build clang vulkan-sdk
-
-      - name: Install dependencies (macOS)
-        if: runner.os == 'macOS'
-        run: |
-          brew install cmake ninja vulkan-sdk
-
-      - name: Configure CMake
-        run: |
-          cmake -S . -B build -G "Ninja" \
-            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
-            -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} \
-            -DDAKT_GUI_BUILD_TESTS=ON \
-            -DDAKT_GUI_BUILD_SHOWCASE=ON
-
-      - name: Build
-        run: ninja -C build
-
-      - name: Run tests
-        run: ctest --output-on-failure -C ${{ env.BUILD_TYPE }}
-        working-directory: build
-
-      - name: Upload artifacts
-        if: success()
-        uses: actions/upload-artifact@v3
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          name: DaktLib-GUI-${{ matrix.name }}-${{ matrix.arch }}
-          path: |
-            ${{ matrix.artifact-dir }}/
-            include/
-            bindings/csharp/
-
-  status-check:
-    needs: build-matrix
-    runs-on: ubuntu-latest
-    if: always()
-
-    steps:
-      - name: Check build status
+          submodules: recursive
+          
+      - name: Setup CMake
+        uses: lukka/get-cmake@latest
+        with:
+          cmakeVersion: ${{ env.CMAKE_VERSION }}
+          
+      # Windows: Setup MSVC or Clang
+      - name: Setup MSVC (Windows)
+        if: matrix.os == 'windows' && matrix.compiler == 'msvc'
+        uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: ${{ matrix.arch }}
+          
+      - name: Setup Clang (Windows)
+        if: matrix.os == 'windows' && matrix.compiler == 'clang'
         run: |
-          if [ "${{ needs.build-matrix.result }}" == "failure" ]; then
-            echo "Build failed on one or more platforms"
-            exit 1
+          choco install llvm ninja -y
+          echo "CC=clang" >> $env:GITHUB_ENV
+          echo "CXX=clang++" >> $env:GITHUB_ENV
+          
+      # Linux: Install packages
+      - name: Install Dependencies (Linux)
+        if: matrix.os == 'linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ${{ matrix.packages }}
+          if [ -n "${{ matrix.cc }}" ]; then
+            echo "CC=${{ matrix.cc }}" >> $GITHUB_ENV
+            echo "CXX=${{ matrix.cxx }}" >> $GITHUB_ENV
           fi
+          
+      # macOS: Install packages
+      - name: Install Dependencies (macOS)
+        if: matrix.os == 'macos'
+        run: brew install ${{ matrix.packages }}
+        
+      # Vulkan SDK (Windows/Linux)
+      - name: Setup Vulkan SDK
+        if: matrix.os != 'macos'
+        uses: humbletim/setup-vulkan-sdk@v1.2.0
+        with:
+          vulkan-query-version: 1.3.290.0
+          vulkan-components: Vulkan-Headers, Vulkan-Loader
+          vulkan-use-cache: true
+          
+      # Configure
+      - name: Configure (MSVC)
+        if: matrix.compiler == 'msvc'
+        run: |
+          cmake -S . -B build `
+            -G "${{ matrix.cmake_generator }}" `
+            -A ${{ matrix.cmake_arch }} `
+            -DDAKT_GUI_BUILD_TESTS=ON `
+            -DDAKT_GUI_BUILD_SHARED=ON `
+            -DDAKT_GUI_BUILD_STATIC=ON
+            
+      - name: Configure (Other)
+        if: matrix.compiler != 'msvc'
+        run: |
+          cmake -S . -B build \
+            -G "${{ matrix.cmake_generator }}" \
+            -DCMAKE_BUILD_TYPE=${{ env.BUILD_TYPE }} \
+            -DDAKT_GUI_BUILD_TESTS=ON \
+            -DDAKT_GUI_BUILD_SHARED=ON \
+            -DDAKT_GUI_BUILD_STATIC=ON
+            
+      # Build
+      - name: Build
+        run: cmake --build build --config ${{ env.BUILD_TYPE }} --parallel
+        
+      # Test
+      - name: Test
+        run: ctest --test-dir build --config ${{ env.BUILD_TYPE }} --output-on-failure
+        
+      # Package artifacts
+      - name: Package
+        run: |
+          cmake --install build --config ${{ env.BUILD_TYPE }} --prefix install
+          
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: daktlib-gui-${{ matrix.os }}-${{ matrix.arch }}-${{ matrix.compiler }}
+          path: install/
+          retention-days: 7

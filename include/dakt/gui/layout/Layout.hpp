@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_LAYOUT_HPP
-#define DAKT_GUI_LAYOUT_HPP
+#ifndef DAKTLIB_GUI_LAYOUT_HPP
+#define DAKTLIB_GUI_LAYOUT_HPP
 
 #include "../core/Types.hpp"
 #include <limits>

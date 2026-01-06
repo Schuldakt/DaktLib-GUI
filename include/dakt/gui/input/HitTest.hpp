@@ -1,11 +1,10 @@
-#ifndef DAKT_GUI_HIT_TEST_HPP
-#define DAKT_GUI_HIT_TEST_HPP
+#ifndef DAKTLIB_GUI_HIT_TEST_HPP
+#define DAKTLIB_GUI_HIT_TEST_HPP
 
 #include "../core/Types.hpp"
 #include "../layout/Layout.hpp"
 #include <cstdint>
 #include <vector>
-
 
 namespace dakt::gui {
 

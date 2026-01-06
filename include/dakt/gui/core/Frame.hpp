@@ -1,9 +1,8 @@
-#ifndef DAKT_GUI_FRAME_HPP
-#define DAKT_GUI_FRAME_HPP
+#ifndef DAKTLIB_GUI_FRAME_HPP
+#define DAKTLIB_GUI_FRAME_HPP
 
 #include "../input/Input.hpp"
 #include "Types.hpp"
-
 
 namespace dakt::gui {
 
@@ -25,4 +24,4 @@ class Frame {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_FRAME_HPP
+#endif // DAKTLIB_GUI_FRAME_HPP

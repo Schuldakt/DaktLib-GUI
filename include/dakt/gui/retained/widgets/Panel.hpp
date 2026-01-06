@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_PANEL_HPP
-#define DAKT_GUI_PANEL_HPP
+#ifndef DAKTLIB_GUI_PANEL_HPP
+#define DAKTLIB_GUI_PANEL_HPP
 
 #include "WidgetBase.hpp"
 
@@ -8,7 +8,7 @@ namespace dakt::gui {
 /**
  * @brief Container panel with optional title/border
  */
-class DAKT_GUI_API Panel : public Widget {
+class DAKTLIB_GUI_API Panel : public Widget {
   public:
     Panel();
     explicit Panel(const std::string& title);
@@ -92,4 +92,4 @@ class DAKT_GUI_API Panel : public Widget {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_PANEL_HPP
+#endif // DAKTLIB_GUI_PANEL_HPP

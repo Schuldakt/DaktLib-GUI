@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_DRAW_BATCHER_HPP
-#define DAKT_GUI_DRAW_BATCHER_HPP
+#ifndef DAKTLIB_GUI_DRAW_BATCHER_HPP
+#define DAKTLIB_GUI_DRAW_BATCHER_HPP
 
 #include "DrawList.hpp"
 #include <vector>
@@ -40,7 +40,7 @@ struct BatchedDrawCommand {
  * - Managing clip rect stack
  * - Batching instanced draws when possible
  */
-class DAKT_GUI_API DrawBatcher {
+class DAKTLIB_GUI_API DrawBatcher {
   public:
     DrawBatcher();
     ~DrawBatcher();
@@ -108,4 +108,4 @@ class DAKT_GUI_API DrawBatcher {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_DRAW_BATCHER_HPP
+#endif // DAKTLIB_GUI_DRAW_BATCHER_HPP

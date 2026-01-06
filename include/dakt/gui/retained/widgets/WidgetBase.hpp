@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_WIDGET_BASE_HPP
-#define DAKT_GUI_WIDGET_BASE_HPP
+#ifndef DAKTLIB_GUI_WIDGET_BASE_HPP
+#define DAKTLIB_GUI_WIDGET_BASE_HPP
 
 #include "../../core/Types.hpp"
 #include <functional>
@@ -91,7 +91,7 @@ using WidgetCallback = std::function<void(const WidgetEvent&)>;
  * Widgets maintain persistent state and generate immediate-mode
  * draw commands when build() is called.
  */
-class DAKT_GUI_API Widget {
+class DAKTLIB_GUI_API Widget {
   public:
     Widget();
     explicit Widget(const std::string& id);
@@ -259,4 +259,4 @@ class DAKT_GUI_API Widget {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_WIDGET_BASE_HPP
+#endif // DAKTLIB_GUI_WIDGET_BASE_HPP

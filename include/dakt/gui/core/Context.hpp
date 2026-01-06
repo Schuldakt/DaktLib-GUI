@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_CONTEXT_HPP
-#define DAKT_GUI_CONTEXT_HPP
+#ifndef DAKTLIB_GUI_CONTEXT_HPP
+#define DAKTLIB_GUI_CONTEXT_HPP
 
 #include "../style/Style.hpp"
 #include "Types.hpp"
@@ -43,4 +43,4 @@ class Context {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_CONTEXT_HPP
+#endif // DAKTLIB_GUI_CONTEXT_HPP

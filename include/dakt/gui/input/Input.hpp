@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_INPUT_HPP
-#define DAKT_GUI_INPUT_HPP
+#ifndef DAKTLIB_GUI_INPUT_HPP
+#define DAKTLIB_GUI_INPUT_HPP
 
 #include "../core/Types.hpp"
 #include <cstdint>

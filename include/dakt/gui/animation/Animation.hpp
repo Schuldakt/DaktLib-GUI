@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_ANIMATION_HPP
-#define DAKT_GUI_ANIMATION_HPP
+#ifndef DAKTLIB_GUI_ANIMATION_HPP
+#define DAKTLIB_GUI_ANIMATION_HPP
 
 #include "../core/Types.hpp"
 #include <cmath>

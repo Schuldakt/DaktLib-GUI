@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_HBOX_HPP
-#define DAKT_GUI_HBOX_HPP
+#ifndef DAKTLIB_GUI_HBOX_HPP
+#define DAKTLIB_GUI_HBOX_HPP
 
 #include "ContainerBase.hpp"
 
@@ -8,7 +8,7 @@ namespace dakt::gui {
 /**
  * @brief Horizontal box container - stacks children left to right
  */
-class DAKT_GUI_API HBox : public UIContainer {
+class DAKTLIB_GUI_API HBox : public UIContainer {
   public:
     HBox() : UIContainer() { setLayoutDirection(LayoutDirection::Horizontal); }
 
@@ -27,4 +27,4 @@ class DAKT_GUI_API HBox : public UIContainer {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_HBOX_HPP
+#endif // DAKTLIB_GUI_HBOX_HPP

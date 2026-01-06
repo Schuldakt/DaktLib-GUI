@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_STACK_HPP
-#define DAKT_GUI_STACK_HPP
+#ifndef DAKTLIB_GUI_STACK_HPP
+#define DAKTLIB_GUI_STACK_HPP
 
 #include "ContainerBase.hpp"
 
@@ -11,7 +11,7 @@ namespace dakt::gui {
  * Children are rendered in order (first child at bottom, last at top).
  * Useful for overlays, modals, and layered interfaces.
  */
-class DAKT_GUI_API Stack : public UIContainer {
+class DAKTLIB_GUI_API Stack : public UIContainer {
   public:
     Stack();
     explicit Stack(const std::string& id);
@@ -49,4 +49,4 @@ class DAKT_GUI_API Stack : public UIContainer {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_STACK_HPP
+#endif // DAKTLIB_GUI_STACK_HPP

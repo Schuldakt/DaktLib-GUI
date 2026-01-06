@@ -24,29 +24,26 @@ Built with C++23, CMake 4.2.1, releases for Windows (x86/x64), Linux, and macOS.
 - [x] **Folder structure created** — All directories scaffold (include/, src/, shaders/, tests/, examples/, bindings/, etc.)
 - [x] **Root CMakeLists.txt configured** — C++23, Ninja generator, platform detection, backend selection
 - [x] **src/CMakeLists.txt created** — Target definitions, conditional backend compilation
-- [ ] **Version management** — Version.hpp.in template for versioning
+- [x] **Version management** — Version.hpp.in template for versioning
 
 ### Toolchain & Cross-Compilation
 
-- [ ] **Windows x86 toolchain** — /arch:IA32 or -m32 flags
-- [ ] **Windows x64 toolchain** — /arch:AVX2 or -m64 flags
-- [ ] **Linux x64 toolchain** — GCC/Clang x86_64 targeting
-- [ ] **macOS x64 toolchain** — Clang ARM64/x86_64 universal builds
-- [ ] **CMake architecture detection** — DAKT_ARCH_* defines for runtime checks
+- [x] **Platform detection** — DAKT_PLATFORM_WINDOWS/LINUX/MACOS defines
+- [x] **Architecture detection** — DAKT_ARCH_X86/X64/ARM64 defines
+- [x] **Compiler flags** — MSVC, GCC, Clang with strict warnings
+- [x] **CMake install targets** — Headers, libraries, CMake package config
 
 ### CI/CD Workflows
 
-- [ ] **GitHub Actions self-hosted runner setup** — Document Windows x86/x64, Linux, macOS provisioning
-- [ ] **Build workflow (build.yml)** — Matrix: [Windows x86/x64, Linux x64, macOS x64/arm64], Ninja builds, artifact upload
-- [ ] **Test workflow (test.yml)** — Run test suites on each platform matrix
-- [ ] **Release workflow (release.yml)** — Trigger on version tags, package static libs + headers + C# bindings
-- [ ] **NuGet publish workflow** — Publish DaktLib.GUI NuGet package on release
+- [x] **Build workflow (build.yml)** — Matrix: Windows/Linux/macOS, multiple compilers
+- [x] **Release workflow (release.yml)** — Tag-triggered, multi-platform builds
+- [x] **NuGet packaging** — DaktLib.GUI.nuspec with runtime-specific natives
 
 ### Packaging & Distribution
 
-- [ ] **DaktLib.GUI.nuspec created** — Single NuGet package with runtime-specific natives (win-x86, win-x64, linux-x64, osx-x64, osx-arm64)
-- [ ] **CMake install targets** — Install headers, static libs, C# bindings to standard locations
-- [ ] **Release artifact generation** — Automated packaging: static libs per platform, include/, C# bindings
+- [x] **DaktLib.GUI.nuspec** — Single NuGet package with all platform natives
+- [x] **CMake package config** — find_package(daktgui) support
+- [x] **MSBuild targets** — Automatic include/lib paths for Visual Studio
 
 ### Self-Hosted Runner Provisioning
 

@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_GLYPH_CACHE_HPP
-#define DAKT_GUI_GLYPH_CACHE_HPP
+#ifndef DAKTLIB_GUI_GLYPH_CACHE_HPP
+#define DAKTLIB_GUI_GLYPH_CACHE_HPP
 
 #include "../core/Types.hpp"
 #include <cstdint>

@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_CONTAINERS_HPP
-#define DAKT_GUI_CONTAINERS_HPP
+#ifndef DAKTLIB_GUI_CONTAINERS_HPP
+#define DAKTLIB_GUI_CONTAINERS_HPP
 
 /**
  * @file Containers.hpp
@@ -17,4 +17,4 @@
 #include "containers/VBox.hpp"
 #include "containers/Wrap.hpp"
 
-#endif // DAKT_GUI_CONTAINERS_HPP
+#endif // DAKTLIB_GUI_CONTAINERS_HPP

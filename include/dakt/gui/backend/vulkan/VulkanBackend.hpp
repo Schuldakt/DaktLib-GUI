@@ -1,12 +1,23 @@
-#ifndef DAKT_GUI_VULKAN_BACKEND_HPP
-#define DAKT_GUI_VULKAN_BACKEND_HPP
+#ifndef DAKTLIB_GUI_VULKAN_BACKEND_HPP
+#define DAKTLIB_GUI_VULKAN_BACKEND_HPP
 
 #include "../IRenderBackend.hpp"
+
+// Only compile Vulkan backend when explicitly enabled
+#if defined(DAKTLIB_ENABLE_VULKAN)
+
 #include <array>
+#include <cstdint>
+#include <memory>
 #include <unordered_map>
 #include <vector>
 
-// Forward declare Vulkan types to avoid header dependency
+// =============================================================================
+// Vulkan Forward Declarations
+// =============================================================================
+// Forward declare Vulkan types to avoid including vulkan.h in the header
+// These match the Vulkan dispatchable/non-dispatchable handle types
+
 typedef struct VkInstance_T* VkInstance;
 typedef struct VkPhysicalDevice_T* VkPhysicalDevice;
 typedef struct VkDevice_T* VkDevice;
@@ -33,16 +44,16 @@ typedef struct VkDeviceMemory_T* VkDeviceMemory;
 
 namespace dakt::gui {
 
-// ============================================================================
+// =============================================================================
 // Vulkan Resource Wrappers
-// ============================================================================
+// =============================================================================
 
 struct VulkanBuffer {
     VkBuffer buffer = nullptr;
     VkDeviceMemory memory = nullptr;
     uint64_t size = 0;
     void* mappedPtr = nullptr;
-    BufferUsage usage;
+    BufferUsage usage = BufferUsage::Vertex;
 };
 
 struct VulkanTexture {
@@ -52,12 +63,12 @@ struct VulkanTexture {
     VkSampler sampler = nullptr;
     uint32_t width = 0;
     uint32_t height = 0;
-    TextureFormat format;
+    TextureFormat format = TextureFormat::RGBA8;
 };
 
-// ============================================================================
+// =============================================================================
 // Frame Resources (per-frame-in-flight)
-// ============================================================================
+// =============================================================================
 
 struct FrameResources {
     VkCommandBuffer commandBuffer = nullptr;
@@ -66,23 +77,29 @@ struct FrameResources {
     VkFence inFlightFence = nullptr;
 
     // Dynamic buffers (ring buffer per frame)
-    VulkanBuffer vertexBuffer;
-    VulkanBuffer indexBuffer;
-    VulkanBuffer uniformBuffer;
+    VulkanBuffer vertexBuffer{};
+    VulkanBuffer indexBuffer{};
+    VulkanBuffer uniformBuffer{};
 
     uint64_t vertexBufferOffset = 0;
     uint64_t indexBufferOffset = 0;
     uint64_t uniformBufferOffset = 0;
 };
 
-// ============================================================================
+// =============================================================================
 // Vulkan Backend Implementation
-// ============================================================================
+// =============================================================================
 
-class DAKT_GUI_API VulkanBackend : public IRenderBackend {
+class DAKTLIB_GUI_API VulkanBackend : public IRenderBackend {
   public:
     VulkanBackend();
     ~VulkanBackend() override;
+
+    // Non-copyable, non-movable
+    VulkanBackend(const VulkanBackend&) = delete;
+    VulkanBackend& operator=(const VulkanBackend&) = delete;
+    VulkanBackend(VulkanBackend&&) = delete;
+    VulkanBackend& operator=(VulkanBackend&&) = delete;
 
     // IRenderBackend interface
     bool initialize(void* windowHandle, uint32_t width, uint32_t height) override;
@@ -105,13 +122,13 @@ class DAKT_GUI_API VulkanBackend : public IRenderBackend {
     void destroyTexture(TextureHandle handle) override;
     void updateTexture(TextureHandle handle, const void* data, uint32_t width, uint32_t height) override;
 
-    const BackendCapabilities& getCapabilities() const override { return capabilities_; }
-    const char* getName() const override { return "Vulkan"; }
+    [[nodiscard]] const BackendCapabilities& getCapabilities() const override { return capabilities_; }
+    [[nodiscard]] const char* getName() const override { return "Vulkan"; }
 
     void setDebugName(ResourceType type, uint64_t handle, const char* name) override;
 
   private:
-    // Initialization
+    // Initialization helpers
     bool createInstance();
     bool selectPhysicalDevice();
     bool createLogicalDevice();
@@ -125,20 +142,21 @@ class DAKT_GUI_API VulkanBackend : public IRenderBackend {
     bool createPipelines();
     bool createDefaultResources();
 
-    // Cleanup
+    // Cleanup helpers
     void destroySwapchain();
     void cleanupResources();
 
-    // Helpers
+    // Utility helpers
     uint32_t findMemoryType(uint32_t typeFilter, uint32_t properties);
     VkShaderModule createShaderModule(const uint32_t* code, size_t size);
 
-    // Recording
+    // Rendering helpers
     void recordCommandBuffer(const DrawList& drawList);
     void bindPipeline(bool textured);
     void updateUniformBuffer();
 
-    // Vulkan handles
+  private:
+    // Vulkan core handles
     VkInstance instance_ = nullptr;
     VkPhysicalDevice physicalDevice_ = nullptr;
     VkDevice device_ = nullptr;
@@ -166,7 +184,7 @@ class DAKT_GUI_API VulkanBackend : public IRenderBackend {
 
     // Frame management
     static constexpr uint32_t MAX_FRAMES_IN_FLIGHT = 2;
-    std::array<FrameResources, MAX_FRAMES_IN_FLIGHT> frameResources_;
+    std::array<FrameResources, MAX_FRAMES_IN_FLIGHT> frameResources_{};
     uint32_t currentFrame_ = 0;
     uint32_t imageIndex_ = 0;
 
@@ -185,7 +203,7 @@ class DAKT_GUI_API VulkanBackend : public IRenderBackend {
     VkDescriptorSet currentDescriptorSet_ = nullptr;
 
     // Capabilities
-    BackendCapabilities capabilities_;
+    BackendCapabilities capabilities_{};
 
     // State
     bool initialized_ = false;
@@ -194,6 +212,26 @@ class DAKT_GUI_API VulkanBackend : public IRenderBackend {
     uint32_t windowHeight_ = 0;
 };
 
+// Factory function declaration
+[[nodiscard]] DAKTLIB_GUI_API std::unique_ptr<IRenderBackend> createVulkanBackend();
+
 } // namespace dakt::gui
+
+#else // !DAKTLIB_ENABLE_VULKAN
+
+// =============================================================================
+// Stub when Vulkan is not enabled
+// =============================================================================
+
+#include <memory>
+
+namespace dakt::gui {
+
+// Factory returns nullptr when Vulkan is disabled
+[[nodiscard]] inline std::unique_ptr<IRenderBackend> createVulkanBackend() { return nullptr; }
+
+} // namespace dakt::gui
+
+#endif // DAKTLIB_ENABLE_VULKAN
 
 #endif // DAKT_GUI_VULKAN_BACKEND_HPP

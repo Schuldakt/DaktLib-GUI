@@ -4,9 +4,9 @@ cmake_minimum_required(VERSION 3.23)
 # DaktLib-GUI Examples
 # ============================================================================
 
-option(DAKTGUI_BUILD_EXAMPLES "Build example applications" OFF)
+option(DAKTLIBGUI_BUILD_EXAMPLES "Build example applications" OFF)
 
-if(DAKTGUI_BUILD_EXAMPLES)
+if(DAKTLIBGUI_BUILD_EXAMPLES)
     # Find GLFW for windowing
     find_package(glfw3 3.3 QUIET)
     find_package(OpenGL REQUIRED)
@@ -14,18 +14,18 @@ if(DAKTGUI_BUILD_EXAMPLES)
     if(glfw3_FOUND)
         message(STATUS "GLFW found - building showcase example")
         
-        add_executable(daktgui_showcase showcase.cpp)
+        add_executable(DaktLib-GUI_showcase showcase.cpp)
         
-        target_link_libraries(daktgui_showcase PRIVATE 
-            $<IF:$<TARGET_EXISTS:daktgui_static>,daktgui_static,daktgui_shared>
+        target_link_libraries(DaktLib-GUI_showcase PRIVATE 
+            $<IF:$<TARGET_EXISTS:DaktLib-GUI_static>,DaktLib-GUI_static,DaktLib-GUI_shared>
             glfw
             OpenGL::GL
         )
         
-        target_compile_features(daktgui_showcase PRIVATE cxx_std_23)
+        target_compile_features(DaktLib-GUI_showcase PRIVATE cxx_std_23)
         
         # Copy to build directory
-        set_target_properties(daktgui_showcase PROPERTIES
+        set_target_properties(DaktLib-GUI_showcase PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
         )
     else()

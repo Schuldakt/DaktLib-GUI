@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_WIDGETS_HPP
-#define DAKT_GUI_WIDGETS_HPP
+#ifndef DAKTLIB_GUI_WIDGETS_HPP
+#define DAKTLIB_GUI_WIDGETS_HPP
 
 /**
  * @file Widgets.hpp
@@ -33,4 +33,4 @@
 // Shape widgets
 #include "widgets/Shape.hpp"
 
-#endif // DAKT_GUI_WIDGETS_HPP
+#endif // DAKTLIB_GUI_WIDGETS_HPP

@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_DROPDOWN_HPP
-#define DAKT_GUI_DROPDOWN_HPP
+#ifndef DAKTLIB_GUI_DROPDOWN_HPP
+#define DAKTLIB_GUI_DROPDOWN_HPP
 
 #include "WidgetBase.hpp"
 
@@ -8,7 +8,7 @@ namespace dakt::gui {
 /**
  * @brief Dropdown/ComboBox widget
  */
-class DAKT_GUI_API Dropdown : public Widget {
+class DAKTLIB_GUI_API Dropdown : public Widget {
   public:
     struct Item {
         std::string label;
@@ -95,4 +95,4 @@ class DAKT_GUI_API Dropdown : public Widget {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_DROPDOWN_HPP
+#endif // DAKTLIB_GUI_DROPDOWN_HPP

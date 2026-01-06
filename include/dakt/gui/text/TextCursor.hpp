@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_TEXT_CURSOR_HPP
-#define DAKT_GUI_TEXT_CURSOR_HPP
+#ifndef DAKTLIB_GUI_TEXT_CURSOR_HPP
+#define DAKTLIB_GUI_TEXT_CURSOR_HPP
 
 #include "../core/Types.hpp"
 #include "TextShaper.hpp"

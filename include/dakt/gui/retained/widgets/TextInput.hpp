@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_TEXT_INPUT_HPP
-#define DAKT_GUI_TEXT_INPUT_HPP
+#ifndef DAKTLIB_GUI_TEXT_INPUT_HPP
+#define DAKTLIB_GUI_TEXT_INPUT_HPP
 
 #include "WidgetBase.hpp"
 #include <vector>
@@ -31,7 +31,7 @@ struct TextEditAction {
  * - Home/End navigation
  * - Select all (Ctrl+A)
  */
-class DAKT_GUI_API TextInput : public Widget {
+class DAKTLIB_GUI_API TextInput : public Widget {
   public:
     TextInput();
 
@@ -172,4 +172,4 @@ class DAKT_GUI_API TextInput : public Widget {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_TEXT_INPUT_HPP
+#endif // DAKTLIB_GUI_TEXT_INPUT_HPP

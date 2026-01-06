@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_RADIO_BUTTON_HPP
-#define DAKT_GUI_RADIO_BUTTON_HPP
+#ifndef DAKTLIB_GUI_RADIO_BUTTON_HPP
+#define DAKTLIB_GUI_RADIO_BUTTON_HPP
 
 #include "WidgetBase.hpp"
 
@@ -10,7 +10,7 @@ class RadioGroup;
 /**
  * @brief Radio button widget (mutually exclusive selection)
  */
-class DAKT_GUI_API RadioButton : public Widget {
+class DAKTLIB_GUI_API RadioButton : public Widget {
   public:
     RadioButton();
     explicit RadioButton(const std::string& label);
@@ -62,7 +62,7 @@ class DAKT_GUI_API RadioButton : public Widget {
 /**
  * @brief Group for managing mutually exclusive radio buttons
  */
-class DAKT_GUI_API RadioGroup {
+class DAKTLIB_GUI_API RadioGroup {
   public:
     RadioGroup() = default;
     explicit RadioGroup(const std::string& id) : id_(id) {}
@@ -89,4 +89,4 @@ class DAKT_GUI_API RadioGroup {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_RADIO_BUTTON_HPP
+#endif // DAKTLIB_GUI_RADIO_BUTTON_HPP

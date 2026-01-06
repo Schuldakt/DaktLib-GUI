@@ -1,5 +1,5 @@
-#ifndef DAKT_GUI_TREE_NODE_HPP
-#define DAKT_GUI_TREE_NODE_HPP
+#ifndef DAKTLIB_GUI_TREE_NODE_HPP
+#define DAKTLIB_GUI_TREE_NODE_HPP
 
 #include "WidgetBase.hpp"
 
@@ -8,7 +8,7 @@ namespace dakt::gui {
 /**
  * @brief Expandable tree node widget
  */
-class DAKT_GUI_API TreeNode : public Widget {
+class DAKTLIB_GUI_API TreeNode : public Widget {
   public:
     TreeNode();
     explicit TreeNode(const std::string& label);
@@ -63,4 +63,4 @@ class DAKT_GUI_API TreeNode : public Widget {
 
 } // namespace dakt::gui
 
-#endif // DAKT_GUI_TREE_NODE_HPP
+#endif // DAKTLIB_GUI_TREE_NODE_HPP
