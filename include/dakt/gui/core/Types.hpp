@@ -221,7 +221,15 @@ enum class FlexWrap { NoWrap, Wrap, WrapReverse };
 // Input Types
 // ============================================================================
 
-enum class MouseButton { Left = 0, Right = 1, Middle = 2, Back = 3, Forward = 4 };
+enum class MouseButton {
+    Left    = 0,
+    Right   = 1, 
+    Middle  = 2, 
+    Back    = 3, 
+    Forward = 4, 
+    X1      = 5, 
+    X2      = 6 
+};
 
 enum class Key {
     None = 0,
@@ -333,8 +341,74 @@ struct KeyboardInput {
 // Styling Types
 // ============================================================================
 
-enum class WidgetState { Normal, Hover, Active, Disabled, Focus };
+enum class WidgetState {
+    Normal,
+    Hover, 
+    Active, 
+    Disabled, 
+    Focus
+};
 
+enum class TableFlags : uint32_t {
+    None            = 0,
+    Resizable       = 1 << 0,
+    Reorderable     = 1 << 1,
+    Hideable        = 1 << 2,
+    Sortable        = 1 << 3,
+    RowBg           = 1 << 4,
+    Borders         = 1 << 5,
+    ScrollX         = 1 << 6,
+    ScrollY         = 1 << 7,
+    BordersInnerH   = 1 << 8,
+    BordersInnerV   = 1 << 9,
+    BordersOuterH   = 1 << 10,
+    BordersOuterV   = 1 << 11
+};
+
+enum class WindowFlags : std::uint32_t {
+    None                = 0,
+    NoTitleBar          = 1 << 0,
+    NoResize            = 1 << 1,
+    NoMove              = 1 << 2,
+    NoScrollBar         = 1 << 3,
+    NoCollapse          = 1 << 4,
+    NoBackground        = 1 << 5,
+    AlwaysAutoResize    = 1 << 6
+
+};
+
+enum class InputTextFlags : std::uint32_t { 
+    None                = 0, 
+    ReadOnly            = 1 << 0, 
+    Password            = 1 << 1, 
+    Multiline           = 1 << 2, 
+    AllowTabInput       = 1 << 3,
+    CharsDecimal        = 1 << 4,
+    CharsHexadecimal    = 1 << 5,
+    CharsUppercase      = 1 << 6,
+    CharsNoBlank        = 1 << 7,
+    AutoSelectAll       = 1 << 8,
+    EnterReturnsTrue    = 1 << 9
+};
+
+enum class SelectableFlags : uint32_t {
+    None                = 0,
+    DontClosePopups     = 1 << 0,
+    SpanAllColumns      = 1 << 1,
+    AllowDoubleClick    = 1 << 2,
+    Disabled            = 1 << 3 
+};
+
+enum class TreeNodeFlags : uint32_t {
+    None                = 0,
+    Selected            = 1 << 0,
+    Framed              = 1 << 1,
+    OpenOnArrow         = 1 << 2,
+    OpenOnDoubleClick   = 1 << 3,
+    Leaf                = 1 << 4,
+    DefaultOpen         = 1 << 5,
+    SpanAllColumns      = 1 << 6
+};
 struct EdgeInsets {
     float top = 0.0f;
     float right = 0.0f;
@@ -364,6 +438,8 @@ struct Shadow {
     float spread = 0.0f;
     Color color = Color(0, 0, 0, 128);
 };
+
+
 
 } // namespace dakt::gui
 

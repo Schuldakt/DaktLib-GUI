@@ -12,6 +12,7 @@
 #include "dakt/gui/retained/Containers/Stack.hpp"
 #include "dakt/gui/retained/Containers/VBox.hpp"
 #include "dakt/gui/retained/Containers/Wrap.hpp"
+#include "dakt/gui/subsystems/input/Input.hpp"
 
 namespace dakt::gui {
 

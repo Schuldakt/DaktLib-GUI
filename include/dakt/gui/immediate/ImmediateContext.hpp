@@ -26,9 +26,29 @@ namespace dakt::gui {
     DAKTLIB_GUI_API bool isItemHovered();
     DAKTLIB_GUI_API bool isItemActive();
     DAKTLIB_GUI_API bool isItemFocused();
+    DAKTLIB_GUI_API bool isItemClicked(MouseButton button = MouseButton::Left);
+    DAKTLIB_GUI_API bool isItemEdited();
+    DAKTLIB_GUI_API bool isItemActivated();
+    DAKTLIB_GUI_API bool isItemDeactivated();
+    DAKTLIB_GUI_API Vec2 getItemRectMin();
+    DAKTLIB_GUI_API Vec2 getItemRectMax();
+    DAKTLIB_GUI_API Vec2 getItemRectSize();
+    DAKTLIB_GUI_API void setItemDefaultFocus();
+    DAKTLIB_GUI_API void setKeyboardFocusHere(int offset = 0);
+
+    // Mouse utilities
+    DAKTLIB_GUI_API bool isMouseHoveringRect(Vec2 min, Vec2 max);
+    DAKTLIB_GUI_API bool isMouseClicked(MouseButton button = MouseButton::Left);
+    DAKTLIB_GUI_API bool isMouseDoubleClicked(MouseButton button = MouseButton::Left);
+    DAKTLIB_GUI_API bool isMouseDown(MouseButton button = MouseButton::Left);
+    DAKTLIB_GUI_API bool isMouseReleased(MouseButton button = MouseButton::Left);
+    DAKTLIB_GUI_API Vec2 getMousePos();
+    DAKTLIB_GUI_API Vec2 getMouseDragDelta(MouseButton button = MouseButton::Left);
 
     // Draw
     DAKTLIB_GUI_API DrawList* getWindowDrawList();
+    DAKTLIB_GUI_API DrawList* getForegroundDrawList();
+    DAKTLIB_GUI_API DrawList* getBackgroundDrawList();
 
     // Retained embedding hook
     DAKTLIB_GUI_API void embedRetained(const char* id, Widget* widget, Vec2 size = Vec2(0, 0));

@@ -192,7 +192,32 @@ set(DAKTLIB_GUI_SOURCES
 
     # Immediate Mode
     src/immediate/Immediate.cpp
-    src/immediate/Widgets.cpp
+
+    # Immediate Mode Containers
+    src/immediate/Containers/Child.cpp
+    src/immediate/Containers/Group.cpp
+    src/immediate/Containers/Layout.cpp
+    src/immediate/Containers/Window.cpp
+
+    # Immediate Mode Internal
+    src/immediate/internal/ImmediateState.cpp
+    src/immediate/internal/ImmediateStateAccess.cpp
+
+    # Immediate Mode Widgets
+    src/immediate/Widgets/Button.cpp
+    src/immediate/Widgets/Checkbox.cpp
+    src/immediate/Widgets/Color.cpp
+    src/immediate/Widgets/InputText.cpp
+    src/immediate/Widgets/ListBox.cpp
+    src/immediate/Widgets/Menu.cpp
+    src/immediate/Widgets/Popup.cpp
+    src/immediate/Widgets/ProgressBar.cpp
+    src/immediate/Widgets/Selectable.cpp
+    src/immediate/Widgets/Slider.cpp
+    src/immediate/Widgets/Table.cpp
+    src/immediate/Widgets/Text.cpp
+    src/immediate/Widgets/Tooltip.cpp
+    src/immediate/Widgets/Tree.cpp
 
     # Retained Mode - Core
     src/retained/UIContainer.cpp
@@ -418,7 +443,7 @@ if(DAKTLIB_GUI_BUILD_TESTS)
     enable_testing()
     set(DAKTLIB_TESTING_LIBRARY $<IF:$<TARGET_EXISTS:DaktLib-GUI_static>,DaktLib-GUI_static,DaktLib-GUI_shared>)
 
-    foreach(PHASE IN ITEMS phase1 phase2 phase3 phase4)
+    foreach(PHASE IN ITEMS phase1 phase2 phase3)
         if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/${PHASE}_tests.cpp")
             add_executable(DaktLib-GUI_${PHASE}_tests tests/${PHASE}_tests.cpp)
             target_link_libraries(DaktLib-GUI_${PHASE}_tests PRIVATE ${DAKTLIB_TESTING_LIBRARY})

@@ -7,7 +7,14 @@
 
 namespace dakt::gui {
 
-    Context::Context(IRenderBackend* backend) : backend_(backend), deltaTime_(0.0f), frameCount_(0), drawList_(std::make_unique<DrawList>()), rootLayout_(std::make_unique<LayoutNode>()) {}
+    Context::Context(IRenderBackend* backend)
+        : backend_(backend)
+        , deltaTime_(0.0f)
+        , frameCount_(0)
+        , drawList_(std::make_unique<DrawList>())
+        , rootLayout_(std::make_unique<LayoutNode>())
+        , immediateState_(std::make_unique<ImmediateState>())  // Create once, persist across frames
+    {}
 
     Context::~Context() = default;
 
@@ -15,7 +22,7 @@ namespace dakt::gui {
         deltaTime_ = deltaTime;
         frameCount_++;
         drawList_->reset();
-        immediateState_ = std::make_unique<ImmediateState>();
+        // Don't recreate immediateState_ - it persists across frames
     }
 
     void Context::endFrame() {

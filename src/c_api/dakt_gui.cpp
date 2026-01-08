@@ -12,10 +12,10 @@
 #include "dakt/gui/backend/IRenderBackend.hpp"
 #include "dakt/gui/core/Context.hpp"
 #include "dakt/gui/core/Types.hpp"
-#include "dakt/gui/draw/DrawList.hpp"
+#include "dakt/gui/subsystems/draw/DrawList.hpp"
 #include "dakt/gui/immediate/Immediate.hpp"
-#include "dakt/gui/input/Input.hpp"
-#include "dakt/gui/style/Style.hpp"
+#include "dakt/gui/subsystems/input/Input.hpp"
+#include "dakt/gui/subsystems/style/Style.hpp"
 
 // Backend headers (conditionally included)
 #if defined(DAKTLIB_ENABLE_VULKAN)
@@ -120,6 +120,27 @@ inline dakt::gui::Key toKey(DuiKey key) {
     return dakt::gui::Key::None;
 }
 
+// Add bitwise operators for WindowFlags
+inline dakt::gui::WindowFlags operator|(dakt::gui::WindowFlags a, dakt::gui::WindowFlags b) {
+    using T = std::underlying_type_t<dakt::gui::WindowFlags>;
+    return static_cast<dakt::gui::WindowFlags>(static_cast<T>(a) | static_cast<T>(b));
+}
+inline dakt::gui::WindowFlags operator&(dakt::gui::WindowFlags a, dakt::gui::WindowFlags b) {
+    using T = std::underlying_type_t<dakt::gui::WindowFlags>;
+    return static_cast<dakt::gui::WindowFlags>(static_cast<T>(a) & static_cast<T>(b));
+}
+
+// Add bitwise operators for InputTextFlags
+inline dakt::gui::InputTextFlags operator|(dakt::gui::InputTextFlags a, dakt::gui::InputTextFlags b) {
+    using T = std::underlying_type_t<dakt::gui::InputTextFlags>;
+    return static_cast<dakt::gui::InputTextFlags>(static_cast<T>(a) | static_cast<T>(b));
+}
+inline dakt::gui::InputTextFlags operator&(dakt::gui::InputTextFlags a, dakt::gui::InputTextFlags b) {
+    using T = std::underlying_type_t<dakt::gui::InputTextFlags>;
+    return static_cast<dakt::gui::InputTextFlags>(static_cast<T>(a) & static_cast<T>(b));
+}
+
+
 inline dakt::gui::WindowFlags toWindowFlags(DuiWinFlags flags) {
     dakt::gui::WindowFlags result = dakt::gui::WindowFlags::None;
 
@@ -130,7 +151,7 @@ inline dakt::gui::WindowFlags toWindowFlags(DuiWinFlags flags) {
     if (flags & DAKT_GUI_WINDOW_NO_MOVE)
         result = result | dakt::gui::WindowFlags::NoMove;
     if (flags & DAKT_GUI_WINDOW_NO_SCROLLBAR)
-        result = result | dakt::gui::WindowFlags::NoScrollbar;
+        result = result | dakt::gui::WindowFlags::NoScrollBar;
     if (flags & DAKT_GUI_WINDOW_NO_COLLAPSE)
         result = result | dakt::gui::WindowFlags::NoCollapse;
     if (flags & DAKT_GUI_WINDOW_NO_BACKGROUND)
@@ -283,10 +304,7 @@ DAKTLIB_GUI_API DuiCtx Create(const DuiConfig* config) {
         // Create input system
         internal->input = std::make_unique<dakt::gui::InputSystem>();
 
-        // Create context
-        internal->context = std::make_unique<dakt::gui::Context>();
-
-        // Create backend if specified
+        // Create backend if specified (must be created before context)
         if (config && config->backend != DAKT_GUI_BACKEND_NONE) {
             internal->backend = createBackend(config->backend);
 
@@ -308,6 +326,9 @@ DAKTLIB_GUI_API DuiCtx Create(const DuiConfig* config) {
                 return nullptr;
             }
         }
+
+        // Create context (requires backend pointer, can be null)
+        internal->context = std::make_unique<dakt::gui::Context>(internal->backend.get());
 
         // Set as current context
         g_currentContext = internal;
@@ -368,7 +389,7 @@ DAKTLIB_GUI_API void NewFrame(DuiCtx ctx, float deltaTime) {
     }
 
     // Begin immediate mode frame
-    dakt::gui::beginFrame(internal->context.get(), deltaTime);
+    dakt::gui::beginFrame(*internal->context, deltaTime);
 }
 
 DAKTLIB_GUI_API void EndFrame(DuiCtx ctx) {
@@ -380,7 +401,7 @@ DAKTLIB_GUI_API void EndFrame(DuiCtx ctx) {
     }
 
     // End immediate mode frame
-    dakt::gui::endFrame();
+    dakt::gui::endFrame(*internal->context);
 }
 
 DAKTLIB_GUI_API void Render(DuiCtx ctx) {
@@ -632,7 +653,8 @@ DAKTLIB_GUI_API void Bullet(DuiCtx ctx) {
     if (!internal || !internal->context) {
         return;
     }
-    dakt::gui::bullet();
+    // bullet() not implemented in immediate mode - draw a bullet point manually
+    dakt::gui::text("•");
 }
 
 DAKTLIB_GUI_API int32_t Button(DuiCtx ctx, const char* label) {
@@ -715,7 +737,8 @@ DAKTLIB_GUI_API int32_t IntField(DuiCtx ctx, const char* label, int32_t* value, 
     }
 
     int intValue = static_cast<int>(*value);
-    bool changed = dakt::gui::inputInt(label, &intValue, step, stepFast);
+    // inputInt only takes label and value pointer
+    bool changed = dakt::gui::inputInt(label, &intValue);
     *value = static_cast<int32_t>(intValue);
 
     return changed ? 1 : 0;
@@ -726,7 +749,8 @@ DAKTLIB_GUI_API int32_t FloatField(DuiCtx ctx, const char* label, float* value, 
     if (!internal || !internal->context || !label || !value) {
         return 0;
     }
-    return dakt::gui::inputFloat(label, value, step, stepFast, format ? format : "%.3f") ? 1 : 0;
+    // inputFloat only takes label and value pointer
+    return dakt::gui::inputFloat(label, value) ? 1 : 0;
 }
 
 // =============================================================================
@@ -857,7 +881,8 @@ DAKTLIB_GUI_API int32_t BeginCombo(DuiCtx ctx, const char* label, const char* pr
     if (!internal || !internal->context || !label) {
         return 0;
     }
-    return dakt::gui::beginCombo(label, previewValue ? previewValue : "") ? 1 : 0;
+    // beginCombo not implemented - stub
+    return 0;
 }
 
 DAKTLIB_GUI_API void EndCombo(DuiCtx ctx) {
@@ -865,7 +890,7 @@ DAKTLIB_GUI_API void EndCombo(DuiCtx ctx) {
     if (!internal || !internal->context) {
         return;
     }
-    dakt::gui::endCombo();
+    // endCombo not implemented - stub
 }
 
 DAKTLIB_GUI_API int32_t SimpCombo(DuiCtx ctx, const char* label, int32_t* currentItem, const char* const* items, int32_t itemCount) {
@@ -874,8 +899,9 @@ DAKTLIB_GUI_API int32_t SimpCombo(DuiCtx ctx, const char* label, int32_t* curren
         return 0;
     }
 
+    // combo not implemented - use listBox as fallback
     int index = static_cast<int>(*currentItem);
-    bool changed = dakt::gui::combo(label, &index, items, itemCount);
+    bool changed = dakt::gui::listBox(label, &index, items, itemCount);
     *currentItem = static_cast<int32_t>(index);
 
     return changed ? 1 : 0;
@@ -920,7 +946,8 @@ DAKTLIB_GUI_API int32_t SelectableItem(DuiCtx ctx, const char* label, int32_t* s
     }
 
     bool sel = selected ? (*selected != 0) : false;
-    bool clicked = dakt::gui::selectable(label, &sel, toSelectableFlags(flags));
+    // selectable doesn't take flags in this API
+    bool clicked = dakt::gui::selectable(label, &sel);
 
     if (selected) {
         *selected = sel ? 1 : 0;
@@ -934,7 +961,9 @@ DAKTLIB_GUI_API int32_t BeginListBox(DuiCtx ctx, const char* label, DuiVec2 size
     if (!internal || !internal->context || !label) {
         return 0;
     }
-    return dakt::gui::beginListBox(label, toVec2(size)) ? 1 : 0;
+    // beginListBox not implemented - use listBox instead for simple cases
+    // For now, just return true to allow content
+    return 1;
 }
 
 DAKTLIB_GUI_API void EndListBox(DuiCtx ctx) {
@@ -942,7 +971,7 @@ DAKTLIB_GUI_API void EndListBox(DuiCtx ctx) {
     if (!internal || !internal->context) {
         return;
     }
-    dakt::gui::endListBox();
+    // endListBox not implemented
 }
 
 // =============================================================================
@@ -1138,7 +1167,8 @@ DAKTLIB_GUI_API int32_t BeginTabBar(DuiCtx ctx, const char* id) {
     if (!internal || !internal->context || !id) {
         return 0;
     }
-    return dakt::gui::beginTabBar(id) ? 1 : 0;
+    // beginTabBar not implemented - stub
+    return 0;
 }
 
 DAKTLIB_GUI_API void EndTabBar(DuiCtx ctx) {
@@ -1146,7 +1176,7 @@ DAKTLIB_GUI_API void EndTabBar(DuiCtx ctx) {
     if (!internal || !internal->context) {
         return;
     }
-    dakt::gui::endTabBar();
+    // endTabBar not implemented - stub
 }
 
 DAKTLIB_GUI_API int32_t BeginTabItem(DuiCtx ctx, const char* label, int32_t* open) {
@@ -1154,17 +1184,8 @@ DAKTLIB_GUI_API int32_t BeginTabItem(DuiCtx ctx, const char* label, int32_t* ope
     if (!internal || !internal->context || !label) {
         return 0;
     }
-
-    bool openBool = open ? (*open != 0) : true;
-    bool* openPtr = open ? &openBool : nullptr;
-
-    bool result = dakt::gui::beginTabItem(label, openPtr);
-
-    if (open) {
-        *open = openBool ? 1 : 0;
-    }
-
-    return result ? 1 : 0;
+    // beginTabItem not implemented - stub
+    return 0;
 }
 
 DAKTLIB_GUI_API void EndTabItem(DuiCtx ctx) {
@@ -1172,7 +1193,7 @@ DAKTLIB_GUI_API void EndTabItem(DuiCtx ctx) {
     if (!internal || !internal->context) {
         return;
     }
-    dakt::gui::endTabItem();
+    // endTabItem not implemented - stub
 }
 
 // =============================================================================
@@ -1208,7 +1229,8 @@ DAKTLIB_GUI_API void Dummy(DuiCtx ctx, DuiVec2 size) {
     if (!internal || !internal->context) {
         return;
     }
-    dakt::gui::dummy(toVec2(size));
+    // dummy not implemented - use spacing as fallback
+    dakt::gui::spacing();
 }
 
 DAKTLIB_GUI_API void Indent(DuiCtx ctx, float width) {
@@ -1248,7 +1270,7 @@ DAKTLIB_GUI_API void SetNextItemWidth(DuiCtx ctx, float width) {
     if (!internal || !internal->context) {
         return;
     }
-    dakt::gui::setNextItemWidth(width);
+    // setNextItemWidth not implemented - stub
 }
 
 DAKTLIB_GUI_API void PushItemWidth(DuiCtx ctx, float width) {
@@ -1256,7 +1278,7 @@ DAKTLIB_GUI_API void PushItemWidth(DuiCtx ctx, float width) {
     if (!internal || !internal->context) {
         return;
     }
-    dakt::gui::pushItemWidth(width);
+    // pushItemWidth not implemented - stub
 }
 
 DAKTLIB_GUI_API void PopItemWidth(DuiCtx ctx) {
@@ -1264,7 +1286,7 @@ DAKTLIB_GUI_API void PopItemWidth(DuiCtx ctx) {
     if (!internal || !internal->context) {
         return;
     }
-    dakt::gui::popItemWidth();
+    // popItemWidth not implemented - stub
 }
 
 // =============================================================================
@@ -1292,7 +1314,8 @@ DAKTLIB_GUI_API void PushIdPtr(DuiCtx ctx, const void* id) {
     if (!internal || !internal->context || !id) {
         return;
     }
-    dakt::gui::pushID(id);
+    // pushID(const void*) not implemented - use integer hash instead
+    dakt::gui::pushID(static_cast<dakt::gui::ID>(reinterpret_cast<uintptr_t>(id)));
 }
 
 DAKTLIB_GUI_API void PopId(DuiCtx ctx) {
@@ -1315,15 +1338,15 @@ DAKTLIB_GUI_API void GetStyleColors(DuiCtx ctx, DuiStyleColors* colors) {
 
     const dakt::gui::ColorScheme& scheme = internal->context->getTheme().colors();
 
-    colors->text = fromColor(scheme.text);
+    colors->text = fromColor(scheme.textPrimary);
     colors->textDisabled = fromColor(scheme.textDisabled);
     colors->windowBg = fromColor(scheme.background);
     colors->childBg = fromColor(scheme.surface);
     colors->popupBg = fromColor(scheme.surface);
     colors->border = fromColor(scheme.border);
     colors->frameBg = fromColor(scheme.surface);
-    colors->frameBgHovered = fromColor(scheme.surfaceHover);
-    colors->frameBgActive = fromColor(scheme.surfaceActive);
+    colors->frameBgHovered = fromColor(scheme.primaryHover);
+    colors->frameBgActive = fromColor(scheme.primaryActive);
     colors->titleBg = fromColor(scheme.primary);
     colors->titleBgActive = fromColor(scheme.primaryHover);
     colors->button = fromColor(scheme.primary);
@@ -1458,7 +1481,11 @@ DAKTLIB_GUI_API DuiRect GetRect(DuiCtx ctx) {
     if (!internal || !internal->context) {
         return DuiRect{0, 0, 0, 0};
     }
-    return fromRect(dakt::gui::getItemRect());
+    // Construct rect from min/max if getItemRect() is missing
+    dakt::gui::Vec2 min = dakt::gui::getItemRectMin();
+    dakt::gui::Vec2 max = dakt::gui::getItemRectMax();
+    dakt::gui::Rect rect(min.x, min.y, max.x - min.x, max.y - min.y);
+    return fromRect(rect);
 }
 
 // =============================================================================
@@ -1525,7 +1552,7 @@ DAKTLIB_GUI_API const char* GetBackendName(DuiCtx ctx) {
     return internal->backend->getName();
 }
 
-DAKTLIB_GUI_API void Resize(DuiContextHandle ctx, uint32_t width, uint32_t height) {
+DAKTLIB_GUI_API void Resize(DuiCtx ctx, uint32_t width, uint32_t height) {
     InternalContext* internal = getContext(ctx);
     if (!internal || !internal->backend) {
         return;

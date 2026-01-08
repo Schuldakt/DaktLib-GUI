@@ -7,9 +7,17 @@
 
 #include "dakt/gui/retained/UIContainer.hpp"
 #include "dakt/gui/retained/Widget.hpp"
-#include "dakt/gui/retained/widgets/ColorPicker.hpp"
-#include "dakt/gui/retained/widgets/Menu.hpp"
-#include "dakt/gui/retained/widgets/Table.hpp"
+#include "dakt/gui/retained/Widgets/Checkbox.hpp"
+#include "dakt/gui/retained/Widgets/ColorPicker.hpp"
+#include "dakt/gui/retained/Widgets/Menu.hpp"
+#include "dakt/gui/retained/Widgets/Panel.hpp"
+#include "dakt/gui/retained/Widgets/TabBar.hpp"
+#include "dakt/gui/retained/Widgets/Table.hpp"
+#include "dakt/gui/retained/Widgets/Button.hpp"
+#include "dakt/gui/retained/Widgets/Label.hpp"
+#include "dakt/gui/retained/Widgets/TextInput.hpp"
+#include "dakt/gui/retained/Widgets/Slider.hpp"
+#include "dakt/gui/retained/Widgets/TreeNode.hpp"
 
 #include <cassert>
 #include <cmath>

@@ -6,17 +6,6 @@
 
 namespace dakt::gui {
 
-    enum class TreeNodeFlags : uint32_t {
-        None                = 0,
-        Selected            = 1 << 0,
-        Framed              = 1 << 1,
-        OpenOnArrow         = 1 << 2,
-        OpenOnDoubleClick   = 1 << 3,
-        Leaf                = 1 << 4,
-        DefaultOpen         = 1 << 5,
-        SpanAllColumns      = 1 << 6
-    };
-
     inline TreeNodeFlags operator|(TreeNodeFlags a, TreeNodeFlags b) {
         return static_cast<TreeNodeFlags>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b));
     }

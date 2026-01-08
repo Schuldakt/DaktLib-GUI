@@ -1,5 +1,5 @@
 #include "dakt/gui/retained/widgets/Table.hpp"
-#include "dakt/gui/draw/DrawList.hpp"
+#include "dakt/gui/subsystems/draw/DrawList.hpp"
 #include <algorithm>
 #include <sstream>
 

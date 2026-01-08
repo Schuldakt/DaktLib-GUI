@@ -1,7 +1,7 @@
 #ifndef DAKTLIB_GUI_CONTAINER_BASE_HPP
 #define DAKTLIB_GUI_CONTAINER_BASE_HPP
 
-#include "../widgets/WidgetBase.hpp"
+#include "../Widgets/WidgetBase.hpp"
 #include <functional>
 #include <unordered_map>
 

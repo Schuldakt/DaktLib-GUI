@@ -1,93 +1,144 @@
 #pragma once
 
-#include <optional>
-#include <string>
-#include <unordered_map>
-#include <vector>
-
 #include "dakt/gui/core/Types.hpp"
+
+#include <stack>
+#include <vector>
+#include <unordered_map>
+
 namespace dakt::gui {
 
-// Forward declarations to avoid heavy includes.
-class Context;
-class DrawList;
+    class Context;
+    class DrawList;
+    class InputSystem;
 
-struct Vec2;
-struct Rect;
-
-using Id = std::uint32_t;
-
-struct ItemState {
-    bool hovered = false;
-    bool active = false;
-    bool focused = false;
-
-    bool pressed = false;
-    bool clicked = false;
-    bool released = false;
-};
-
-struct WindowState {
-    std::string title;
-
-    Vec2 pos{};
-    Vec2 size{};
-
-    Rect rect{};
-    Rect contentRect{};
-
-    Vec2 cursor{};
-    Vec2 cursorStart{};
-
-    float lineHeight = 0.0f;
-    float indent = 0.0f;
-
-    bool open = true;
-    bool focused = false;
-
-    DrawList* drawList = nullptr;
-};
-
-struct GroupState {
-    Vec2 cursorBackup{};
-    float indentBackup = 0.0f;
-    float lineHeightBackup = 0.0f;
-};
-
-struct ImmediateState {
-    Context* ctx = nullptr;
-
-    float deltaTime = 0.0f;
-    std::uint64_t frameIndex = 0;
-
-    // ID stack
-    std::vector<ID> idStack;
-
-    // Windows
-    std::vector<WindowState> windowStack;
-    std::unordered_map<Id, WindowState> windowsById;
-
-    // Last item state (for queries like isItemHovered())
-    ItemState lastItem{};
-
-    // Per-item persistent states (hover/active etc.)
-    std::unordered_map<Id, ItemState> itemStates;
-
-    // Next-window settings (set by setNextWindowX calls)
-    std::optional<Vec2> nextWindowPos;
-    std::optional<Vec2> nextWindowSize;
-    std::optional<bool> nextWindowCollapsed;
-
-    // Temporary storage for group stacks
-    struct GroupState {
-        Vec2 cursorBackup{};
-        float indentBackup = 0.0f;
-        float lineHeightBackup = 0.0f;
+    // Window state
+    struct WindowState {
+        ID id = 0;
+        const char* name = nullptr;
+        Vec2 pos;
+        Vec2 size;
+        Vec2 contentSize;
+        Vec2 cursorPos;
+        Vec2 cursorStartPos;
+        WindowFlags flags = WindowFlags::None;
+        bool collapsed = false;
+        bool skipItem = false;
     };
-    std::vector<GroupState> groupStack;
-};
 
-// Global singleton state for now (you can later refactor into a context-owned instance).
-extern ImmediateState g_state;
+    struct ColorPickerState {
+        bool initialized = false;   // Track if HSV has been initialized from color
+        bool draggingSV = false;
+        bool draggingHue = false;
+        bool draggingAlpha = false;
+        float hue = 0;
+        float sat = 1;
+        float val = 1;
+    };
+
+    struct MenuState {
+        bool mainMenuBarOpen = false;
+        bool menuBarOpen = false;
+        std::vector<const char*> menuStack;
+        Vec2 menuPosition;
+        float menuBarHeight = 28.0f;
+        int hoveredMenuItem = -1;
+        std::vector<Rect> menuItemRects;
+    };
+
+    struct PopUpState {
+        std::vector<const char*> popupStack;
+        std::vector<Vec2> popupPositions;
+        const char* pendingPopup = nullptr;
+        bool closeRequested = false;
+    };
+
+    struct TooltipState {
+        bool tooltipActive = false;
+        std::string tooltipText;
+        Vec2 tooltipPos;
+    };
+
+    struct TableState {
+        bool tableActive = false;
+        const char* tableId = nullptr;
+        int columns = 0;
+        int currentColumn = -1;
+        int currentRow = -1;
+        TableFlags flags = TableFlags::None;
+        Vec2 tablePos;
+        Vec2 tableSize;
+        std::vector<float> columnWidths;
+        std::vector<const char*> columnLabels;
+        float rowHeight = 24.0f;
+        float headerHeight = 28.0f;
+    };
+
+    // Immediate State (owned by Context)
+    struct ImmediateState {
+        float deltaTime = 0.0f;
+        
+        // ID stack
+        std::vector<ID> idStack;
+        ID currentId = 0;
+
+        // Window stack
+        std::stack<WindowState> windowStack;
+        WindowState* currentWindow = nullptr;
+
+        // Next window hints
+        bool nextWindowPosSet = false;
+        Vec2 nextWindowPos;
+        bool nextWindowSizeSet = false;
+        Vec2 nextWindowSize;
+
+        // Last item state (for queries like isItemHovered())
+        ID lastItemId = 0;
+        Rect lastItemRect;
+        bool lastItemHovered = false;
+        bool lastItemActive = false;
+        bool lastItemEdited = false;
+        bool lastItemActivated = false;
+        bool lastItemDeactivated = false;
+
+        // Hot/Active tracking
+        ID hotId = 0;
+        ID activeId = 0;
+        ID prevActiveId = 0;
+        
+        // Focus management
+        ID focusRequestId = 0;
+        int focusRequestOffset = 0;
+        ID keyboardFocusId = 0;
+        ID defaultFocusId = 0;
+
+        // Double-click tracking
+        float lastClickTime[5] = {};
+        Vec2 lastClickPos[5] = {};
+        ID lastClicked[5] = {};
+        static constexpr float DOUBLE_CLICK_TIME = 0.3f;
+        static constexpr float DOUBLE_CLICK_DIST = 6.0f;
+
+        // Input system reference
+        InputSystem* input = nullptr;
+
+        // Accumulated time
+        float totalTime = 0.0f;
+
+        // Widget-specific color state
+        std::unordered_map<ID, ColorPickerState> colorPickerStates;
+
+        // Menu state
+        MenuState menuState;
+
+        // PopUp state
+        PopUpState popupState;
+
+        // Tooltip state
+        TooltipState tooltipState;
+
+        // Table state
+        TableState tableState;
+    };
 
 } // namespace dakt::gui

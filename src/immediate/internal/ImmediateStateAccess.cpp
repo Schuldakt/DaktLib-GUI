@@ -1,14 +1,29 @@
 #include "dakt/gui/immediate/internal/ImmediateStateAccess.hpp"
-#include "dakt/gui/immediate/internal/ImmediateState.hpp"
+#include "dakt/gui/core/Context.hpp"
 
 namespace dakt::gui {
 
-    thread_local ImmediateState* g_current = nullptr;
+    // Thread-local storage for current context
+    static thread_local Context* g_currentContext = nullptr;
 
-    void setCurrent(ImmediateState* state) { g_current = state; }
+    void setCurrentContext(Context* ctx) {
+        g_currentContext = ctx;
+    }
 
-    ImmediateState& current() { return *g_current; }
+    Context* getCurrentContext() {
+        return g_currentContext;
+    }
 
-    bool hasCurrent() { return g_current != nullptr; }
+    bool hasCurrentContext() {
+        return g_currentContext != nullptr;
+    }
+
+    ImmediateState& getState() {
+        return g_currentContext->getImmediateState();
+    }
+
+    bool hasState() {
+        return g_currentContext != nullptr;
+    }
 
 } // namespace dakt::gui

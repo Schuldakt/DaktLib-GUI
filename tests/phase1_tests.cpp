@@ -1,7 +1,7 @@
 #include "dakt/gui/core/Types.hpp"
-#include "dakt/gui/input/HitTest.hpp"
-#include "dakt/gui/input/Input.hpp"
-#include "dakt/gui/layout/Layout.hpp"
+#include "dakt/gui/subsystems/input/HitTest.hpp"
+#include "dakt/gui/subsystems/input/Input.hpp"
+#include "dakt/gui/subsystems/layout/Layout.hpp"
 #include <cassert>
 #include <iostream>
 #include <vector>
