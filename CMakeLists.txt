@@ -157,6 +157,7 @@ set(DAKTLIB_GUI_SOURCES
     src/core/Types.cpp
     src/core/Context.cpp
     src/core/Frame.cpp
+    src/core/Flags.cpp
 
     # Layout
     src/subsystems/layout/Layout.cpp
@@ -190,8 +191,10 @@ set(DAKTLIB_GUI_SOURCES
     src/subsystems/draw/DrawList.cpp
     src/subsystems/draw/DrawBatcher.cpp
 
-    # Immediate Mode
-    src/immediate/Immediate.cpp
+    # Immediate Core
+    src/immediate/core/Frame.cpp
+    src/immediate/core/ImmediateContext.cpp
+    # src/immediate/Immediate.cpp
 
     # Immediate Mode Containers
     src/immediate/Containers/Child.cpp
@@ -208,11 +211,9 @@ set(DAKTLIB_GUI_SOURCES
     src/immediate/Widgets/Checkbox.cpp
     src/immediate/Widgets/Color.cpp
     src/immediate/Widgets/InputText.cpp
-    src/immediate/Widgets/ListBox.cpp
     src/immediate/Widgets/Menu.cpp
     src/immediate/Widgets/Popup.cpp
     src/immediate/Widgets/ProgressBar.cpp
-    src/immediate/Widgets/Selectable.cpp
     src/immediate/Widgets/Slider.cpp
     src/immediate/Widgets/Table.cpp
     src/immediate/Widgets/Text.cpp

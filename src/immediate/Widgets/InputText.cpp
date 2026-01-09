@@ -1,43 +1,75 @@
 #include "dakt/gui/immediate/Widgets/InputText.hpp"
-#include "dakt/gui/immediate/ImmediateContext.hpp"
+
+#include "dakt/gui/core/Context.hpp"
 #include "dakt/gui/immediate/Widgets/Text.hpp"
-#include "dakt/gui/immediate/internal/WidgetBase.hpp"
+#include "dakt/gui/subsystems/draw/DrawList.hpp"
+
+#include "dakt/gui/immediate/ImmediateContext.hpp"
+#include "dakt/gui/immediate/internal/ImmediateState.hpp"
+#include "dakt/gui/immediate/internal/ImmediateStateAccess.hpp"
 
 #include <cstring>
+#include <cstdio>
 
 namespace dakt::gui {
 
+    static bool pointInRect(const Vec2& p, const Rect& r) {
+        return p.x >= r.x && p.y >= r.y && p.x <= (r.x + r.width) && p.y < (r.y + r.height);
+    }
+
     bool inputText(const char* label, char* buf, size_t bufSize, InputTextFlags flags) {
-        auto w = widgetSetup();
-        if (!w) return false;
+        Context* ctx = getCurrentContext();
+        if (!ctx || !label || !buf) return false;
+
+        ImmediateState& s = getState();
+        if (!s.currentWindow) return false;
+        if (s.currentWindow->skipItems) return false;
+
+        WindowState* win = s.currentWindow;
 
         ID id = getID(label);
 
-        Vec2 pos = getCursorPos();
-        Vec2 windowPos = getWindowPos();
-        Vec2 inputPos = windowPos + pos;
+        const float labelWidth = static_cast<float>(strlen(label)) * 8.0f + 8.0f;
+        const float inputWidth = 200.0f;
+        const float inputHeight = 22.0f;
+        const float spacingY = 4.0f;
 
-        float labelWidth = static_cast<float>(strlen(label)) * 8.0f + 8.0f;
-        float inputWidth = 200.0f;
-        float inputHeight = 22.0f;
-
-        Vec2 boxPos = Vec2(inputPos.x + labelWidth, inputPos.y);
+        Vec2 pos = win->cursorPos;
+        Vec2 boxPos(pos.x + labelWidth, pos.y);
         Rect boxRect(boxPos.x, boxPos.y, inputWidth, inputHeight);
+        Rect bb(pos.x, pos.y, labelWidth + inputWidth, inputHeight);
 
-        bool hovered = isMouseHoveringRect(boxPos, boxPos + Vec2(inputWidth, inputHeight));
+        win->cursorPos.x = win->cursorStartPos.x;
+        win->cursorPos.y += inputHeight + spacingY;
 
-        w.dl->drawText(inputPos, label, w.colors->textPrimary);
+        Vec2 mousePos = getMousePos();
+        bool hovered = pointInRect(mousePos, boxRect);
 
-        Color bgColor = hovered ? w.colors->surfaceVariant : w.colors->surface;
-        w.dl->drawRectFilledRounded(boxRect, bgColor, 2.0f);
-        w.dl->drawRectRounded(boxRect, w.colors->border, 2.0f);
+        if (hovered) s.hotId = id;
 
-        w.dl->drawText(Vec2(boxPos.x + 4, boxPos.y + 3), buf, w.colors->textPrimary);
+        bool active = (s.activeId == id);
 
-        w.state->lastItemId = id;
-        w.state->lastItemHovered = hovered;
+        if (hovered && isMouseClicked(MouseButton::Left)) {
+            s.activeId = id;
+            active = true;
+        }
 
-        setCursorPos(Vec2(pos.x, pos.y + inputHeight + 4.0f));
+        s.lastItemId = id;
+        s.lastItemRect = bb;
+        s.lastItemHovered = hovered;
+        s.lastItemActive = active;
+
+        DrawList* dl = getWindowDrawList();
+        if (dl) {
+            dl->drawText(pos, label, Color::fromFloats(1.0f, 1.0f, 1.0f, 1.0f));
+
+            Color bgColor = hovered ? Color::fromFloats(0.25f, 0.25f, 0.25f, 1.0f) : Color::fromFloats(0.20f, 0.20f, 0.20f, 1.0f);
+            dl->drawRectFilledRounded(boxRect, bgColor, 2.0f);
+            dl->drawRectRounded(boxRect, Color::fromFloats(0.30f, 0.30f, 0.30f, 1.0f), 2.0f);
+
+            Vec2 textPos(boxPos.x + 4, boxPos.y + 3);
+            dl->drawText(textPos, buf, Color::fromFloats(1.0f, 1.0f, 1.0f, 1.0f));
+        }
 
         return false;
     }
@@ -47,7 +79,9 @@ namespace dakt::gui {
     }
 
     bool inputInt(const char* label, int* value, int step, int stepFast) {
-        text("%s: %d", label, *value);
+        char buf[64];
+        snprintf(buf, sizeof(buf), "%d", *value);
+        text("%s: %s", label, buf);
         return false;
     }
 

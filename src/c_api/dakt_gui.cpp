@@ -12,10 +12,29 @@
 #include "dakt/gui/backend/IRenderBackend.hpp"
 #include "dakt/gui/core/Context.hpp"
 #include "dakt/gui/core/Types.hpp"
+#include "dakt/gui/immediate/Containers/Child.hpp"
+#include "dakt/gui/immediate/Containers/Window.hpp"
+#include "dakt/gui/immediate/Containers/Group.hpp"
+#include "dakt/gui/immediate/Containers/Layout.hpp"
+#include "dakt/gui/immediate/Widgets/Text.hpp"
+#include "dakt/gui/immediate/core/Frame.hpp"
+#include "dakt/gui/immediate/core/ImmediateContext.hpp"
 #include "dakt/gui/subsystems/draw/DrawList.hpp"
-#include "dakt/gui/immediate/Immediate.hpp"
 #include "dakt/gui/subsystems/input/Input.hpp"
 #include "dakt/gui/subsystems/style/Style.hpp"
+#include "dakt/gui/immediate/Widgets/InputText.hpp"
+#include "dakt/gui/immediate/Widgets/Button.hpp"
+#include "dakt/gui/immediate/Widgets/Checkbox.hpp"
+#include "dakt/gui/immediate/Widgets/Color.hpp"
+#include "dakt/gui/immediate/Widgets/ListBox.hpp"
+#include "dakt/gui/immediate/Widgets/Menu.hpp"
+#include "dakt/gui/immediate/Widgets/Popup.hpp"
+#include "dakt/gui/immediate/Widgets/ProgressBar.hpp"
+#include "dakt/gui/immediate/Widgets/Selectable.hpp"
+#include "dakt/gui/immediate/Widgets/Slider.hpp"
+#include "dakt/gui/immediate/Widgets/Table.hpp"
+#include "dakt/gui/immediate/Widgets/Tooltip.hpp"
+#include "dakt/gui/immediate/Widgets/Tree.hpp"
 
 // Backend headers (conditionally included)
 #if defined(DAKTLIB_ENABLE_VULKAN)
@@ -125,19 +144,12 @@ inline dakt::gui::WindowFlags operator|(dakt::gui::WindowFlags a, dakt::gui::Win
     using T = std::underlying_type_t<dakt::gui::WindowFlags>;
     return static_cast<dakt::gui::WindowFlags>(static_cast<T>(a) | static_cast<T>(b));
 }
-inline dakt::gui::WindowFlags operator&(dakt::gui::WindowFlags a, dakt::gui::WindowFlags b) {
-    using T = std::underlying_type_t<dakt::gui::WindowFlags>;
-    return static_cast<dakt::gui::WindowFlags>(static_cast<T>(a) & static_cast<T>(b));
-}
+
 
 // Add bitwise operators for InputTextFlags
 inline dakt::gui::InputTextFlags operator|(dakt::gui::InputTextFlags a, dakt::gui::InputTextFlags b) {
     using T = std::underlying_type_t<dakt::gui::InputTextFlags>;
     return static_cast<dakt::gui::InputTextFlags>(static_cast<T>(a) | static_cast<T>(b));
-}
-inline dakt::gui::InputTextFlags operator&(dakt::gui::InputTextFlags a, dakt::gui::InputTextFlags b) {
-    using T = std::underlying_type_t<dakt::gui::InputTextFlags>;
-    return static_cast<dakt::gui::InputTextFlags>(static_cast<T>(a) & static_cast<T>(b));
 }
 
 
@@ -593,7 +605,7 @@ DAKTLIB_GUI_API int32_t BeginChild(DuiCtx ctx, const char* id, DuiVec2 size, int
     if (!internal || !internal->context || !id) {
         return 0;
     }
-    return dakt::gui::beginChild(id, toVec2(size), border != 0) ? 1 : 0;
+    return beginChild(id, toVec2(size), border != 0) ? 1 : 0;
 }
 
 DAKTLIB_GUI_API void EndChild(DuiCtx ctx) {

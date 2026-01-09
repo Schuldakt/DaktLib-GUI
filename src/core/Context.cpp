@@ -29,6 +29,53 @@ namespace dakt::gui {
         // Frame processing
     }
 
+    void Context::beginInputFrame() {
+        // Copy current buttons into prevButtons
+        for (int i = 0; i < static_cast<int>(MouseButton::COUNT); i++) {
+            mouseInput_.prevButtons[i] = mouseInput_.buttons[i];
+        }
+
+        // Clear per-frame accumulators
+        mouseInput_.delta = Vec2(0, 0);
+        mouseInput_.wheelDelta = 0.0f;
+    }
+
+    void Context::setMousePosition(const Vec2& pos) {
+        mouseInput_.position = pos;
+    }
+
+    void Context::setMouseDelta(const Vec2& delta) {
+        mouseInput_.delta = delta;
+    }
+
+    void Context::addMouseWheelDelta(float wheelDelta) {
+        mouseInput_.wheelDelta += wheelDelta;
+    }
+
+    void Context::setMouseButton(MouseButton button, bool down) {
+        const int idx = static_cast<int>(button);
+        if (idx < 0 || idx >= static_cast<int>(MouseButton::COUNT)) {
+            return;
+        }
+        mouseInput_.buttons[idx] = down;
+    }
+
+    void Context::setMouseInput(const MouseInput& input) {
+        mouseInput_ = input;
+    }
+
+    const MouseInput& Context::getMouseInput() const {
+        return mouseInput_;
+    }
+
+    void Context::setKeyboardInput(const KeyboardInput& input) {
+        keyboardInput_ = input;
+    }
+
+    const KeyboardInput& Context::getKeyboardInput() const {
+        return keyboardInput_;
+    }
+
     ImmediateState& Context::getImmediateState() {
         return *immediateState_;
     }

@@ -1,14 +1,26 @@
 #include "dakt/gui/immediate/Widgets/Text.hpp"
+
+#include "dakt/gui/core/Context.hpp"
+#include "dakt/gui/subsystems/draw/DrawList.hpp"
+
 #include "dakt/gui/immediate/ImmediateContext.hpp"
-#include "dakt/gui/immediate/internal/WidgetBase.hpp"
+#include "dakt/gui/immediate/internal/ImmediateState.hpp"
+#include "dakt/gui/immediate/internal/ImmediateStateAccess.hpp"
 
 #include <cstring>
+#include <cstdarg>
 
 namespace dakt::gui {
 
     void text(const char* fmt, ...) {
-        auto w = widgetSetup();
-        if (!w) return;
+        Context* ctx = getCurrentContext();
+        if (!ctx || !fmt) return;
+
+        ImmediateState& s = getState();
+        if (!s.currentWindow) return;
+        if (s.currentWindow->skipItems) return;
+
+        WindowState* win = s.currentWindow;
 
         char buf[1024];
         va_list args;
@@ -16,22 +28,33 @@ namespace dakt::gui {
         vsnprintf(buf, sizeof(buf), fmt, args);
         va_end(args);
 
-        Vec2 pos = getCursorPos();
-        Vec2 windowPos = getWindowPos();
-        Vec2 textPos = windowPos + pos;
+        const float textHeight = 16.0f;
+        const float textWidth = static_cast<float>(strlen(buf)) * 8.0f;
+        const float spacingY = 4.0f;
 
-        w.dl->drawText(textPos, buf, w.colors->textPrimary);
+        Vec2 pos = win->cursorPos;
+        Rect bb(pos.x, pos.y, textWidth, textHeight);
 
-        float textHeight = 16.0f;
-        float textWidth = static_cast<float>(strlen(buf)) * 8.0f;
-        w.state->lastItemRect = Rect(textPos.x, textPos.y, textWidth, textHeight);
+        win->cursorPos.x = win->cursorStartPos.x;
+        win->cursorPos.y += textHeight + spacingY;
 
-        setCursorPos(Vec2(pos.x, pos.y + textHeight + 4.0f));
+        s.lastItemRect = bb;
+
+        DrawList* dl = getWindowDrawList();
+        if (dl) {
+            dl->drawText(pos, buf, Color::fromFloats(1.0f, 1.0f, 1.0f, 1.0f));
+        }
     }
 
     void textColored(Color color, const char* fmt, ...) {
-        auto w = widgetSetup();
-        if (!w) return;
+        Context* ctx = getCurrentContext();
+        if (!ctx || !fmt) return;
+
+        ImmediateState& s = getState();
+        if (!s.currentWindow) return;
+        if (s.currentWindow->skipItems) return;
+
+        WindowState* win = s.currentWindow;
 
         char buf[1024];
         va_list args;
@@ -39,20 +62,33 @@ namespace dakt::gui {
         vsnprintf(buf, sizeof(buf), fmt, args);
         va_end(args);
 
-        Vec2 pos = getCursorPos();
-        Vec2 windowPos = getWindowPos();
-        Vec2 textPos = windowPos + pos;
+        const float textHeight = 16.0f;
+        const float textWidth = static_cast<float>(strlen(buf)) * 8.0f;
+        const float spacingY = 4.0f;
 
-        w.dl->drawText(textPos, buf, color);
+        Vec2 pos = win->cursorPos;
+        Rect bb(pos.x, pos.y, textWidth, textHeight);
 
-        float textHeight = 16.0f;
-        w.state->lastItemRect = Rect(textPos.x, textPos.y, static_cast<float>(strlen(buf)) * 8.0f, textHeight);
-        setCursorPos(Vec2(pos.x, pos.y + textHeight + 4.0f));
+        win->cursorPos.x = win->cursorStartPos.x;
+        win->cursorPos.y += textHeight + spacingY;
+
+        s.lastItemRect = bb;
+
+        DrawList* dl = getWindowDrawList();
+        if (dl) {
+            dl->drawText(pos, buf, color);
+        }
     }
 
     void textDisabled(const char* fmt, ...) {
-        auto w = widgetSetup();
-        if (!w) return;
+        Context* ctx = getCurrentContext();
+        if (!ctx || !fmt) return;
+
+        ImmediateState& s = getState();
+        if (!s.currentWindow) return;
+        if (s.currentWindow->skipItems) return;
+
+        WindowState* win = s.currentWindow;
 
         char buf[1024];
         va_list args;
@@ -60,14 +96,18 @@ namespace dakt::gui {
         vsnprintf(buf, sizeof(buf), fmt, args);
         va_end(args);
 
-        Vec2 pos = getCursorPos();
-        Vec2 windowPos = getWindowPos();
-        Vec2 textPos = windowPos + pos;
+        const float textHeight = 16.0f;
+        const float spacingY = 4.0f;
 
-        w.dl->drawText(textPos, buf, w.colors->textDisabled);
+        Vec2 pos = win->cursorPos;
 
-        float textHeight = 16.0f;
-        setCursorPos(Vec2(pos.x, pos.y + textHeight + 4.0f));
+        win->cursorPos.x = win->cursorStartPos.x;
+        win->cursorPos.y += textHeight + spacingY;
+
+        DrawList* dl = getWindowDrawList();
+        if (dl) {
+            dl->drawText(pos, buf, Color::fromFloats(0.5f, 0.5f, 0.5f, 1.0f));
+        }
     }
 
     void textWrapped(const char* fmt, ...) {
@@ -80,8 +120,14 @@ namespace dakt::gui {
     }
 
     void labelText(const char* label, const char* fmt, ...) {
-        auto w = widgetSetup();
-        if (!w) return;
+        Context* ctx = getCurrentContext();
+        if (!ctx || !label || !fmt) return;
+
+        ImmediateState& s = getState();
+        if (!s.currentWindow) return;
+        if (s.currentWindow->skipItems) return;
+
+        WindowState* win = s.currentWindow;
 
         char buf[1024];
         va_list args;
@@ -89,18 +135,19 @@ namespace dakt::gui {
         vsnprintf(buf, sizeof(buf), fmt, args);
         va_end(args);
 
-        Vec2 pos = getCursorPos();
-        Vec2 windowPos = getWindowPos();
-        Vec2 textPos = windowPos + pos;
+        const float textHeight = 16.0f;
+        const float spacingY = 4.0f;
+        const float labelWidth = static_cast<float>(strlen(label)) * 8.0f + 8.0f;
 
-        w.dl->drawText(textPos, label, w.colors->textSecondary);
+        Vec2 pos = win->cursorPos;
 
-        float labelWidth = static_cast<float>(strlen(label)) * 8.0f + 8.0f;
+        win->cursorPos.x = win->cursorStartPos.x;
+        win->cursorPos.y += textHeight + spacingY;
 
-        w.dl->drawText(Vec2(textPos.x + labelWidth, textPos.y), buf, w.colors->textPrimary);
-
-        float textHeight = 16.0f;
-
-        setCursorPos(Vec2(pos.x, pos.y + textHeight + 4.0f));
+        DrawList* dl = getWindowDrawList();
+        if (dl) {
+            dl->drawText(pos, label, Color::fromFloats(0.7f, 0.7f, 0.7f, 1.0f));
+            dl->drawText(Vec2(pos.x + labelWidth, pos.y), buf, Color::fromFloats(1.0f, 1.0f, 1.0f, 1.0f));
+        }
     }
 } // namespace dakt::gui

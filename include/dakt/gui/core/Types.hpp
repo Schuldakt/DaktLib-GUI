@@ -1,11 +1,10 @@
 #ifndef DAKTLIB_GUI_TYPES_HPP
 #define DAKTLIB_GUI_TYPES_HPP
 
-#include <array>
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <string>
+#include "dakt/gui/core/Flags.hpp"
 
 // ============================================================================
 // Export Macros
@@ -141,6 +140,52 @@ struct DAKTLIB_GUI_API Color {
         a = rgba & 0xFF;
     }
 
+    static Color fromFloats(float r, float g, float b, float a = 1.0f) {
+        auto clamp01 = [](float v) {
+            if (v < 0.0f) return 0.0f;
+            if (v > 1.0f) return 1.0f;
+            return v;
+        };
+
+        r = clamp01(r);
+        g = clamp01(g);
+        b = clamp01(b);
+        a = clamp01(a);
+
+        return Color(
+            static_cast<uint8_t>(r * 255.0f + 0.5f),
+            static_cast<uint8_t>(g * 255.0f + 0.5f),
+            static_cast<uint8_t>(b * 255.0f + 0.5f),
+            static_cast<uint8_t>(a * 255.0f + 0.5f)
+        );
+    }
+
+    void toFloats(float& outR, float& outG, float& outB, float& outA) const {
+        outR = r / 255.0f;
+        outG = g / 255.0f;
+        outB = b / 255.0f;
+        outA = a / 255.0f;
+    }
+
+    Color withAlphaF(float alpha01) const {
+        if (alpha01 < 0.0f) alpha01 = 0.0f;
+        if (alpha01 > 1.0f) alpha01 = 1.0f;
+        return Color(r, g, b, static_cast<uint8_t>(alpha01 * 255.0f + 0.5f));
+    }
+
+    static Color fromRGBA(uint32_t rgba) {
+        return Color(rgba);
+    }
+
+    static Color fromHexRGB(uint32_t rgb, uint8_t a = 255) {
+        return Color(
+            static_cast<uint8_t>((rgb >> 16) & 0xFF),
+            static_cast<uint8_t>((rgb >> 8) & 0xFF),
+            static_cast<uint8_t>(rgb & 0xFFF),
+            a
+        );        
+    }
+
     bool operator==(const Color& other) const { return r == other.r && g == other.g && b == other.b && a == other.a; }
     bool operator!=(const Color& other) const { return !(*this == other); }
 
@@ -207,124 +252,97 @@ struct DAKTLIB_GUI_API Rect {
 // Alignment & Layout
 // ============================================================================
 
-enum class Align { None = 0, Left = 1, Right = 2, Top = 4, Bottom = 8, HCenter = 16, VCenter = 32, Center = HCenter | VCenter };
+enum class Align {
+    None    = 0,
+    Left    = 1, 
+    Right   = 2,
+    Top     = 4,
+    Bottom  = 8,
+    HCenter = 16,
+    VCenter = 32,
+    Center  = HCenter | VCenter
+};
 
-enum class FlexDirection { Row, Column };
+enum class FlexDirection { 
+    Row,
+    Column
+};
 
-enum class JustifyContent { FlexStart, FlexEnd, Center, SpaceBetween, SpaceAround, SpaceEvenly };
+enum class JustifyContent {
+    FlexStart,
+    FlexEnd,
+    Center,
+    SpaceBetween,
+    SpaceAround,
+    SpaceEvenly
+};
 
-enum class AlignItems { FlexStart, FlexEnd, Center, Stretch, Baseline };
+enum class AlignItems {
+    FlexStart,
+    FlexEnd,
+    Center,
+    Stretch,
+    Baseline
+};
 
-enum class FlexWrap { NoWrap, Wrap, WrapReverse };
+enum class FlexWrap {
+    NoWrap,
+    Wrap,
+    WrapReverse
+};
 
 // ============================================================================
 // Input Types
 // ============================================================================
 
-enum class MouseButton {
+enum class MouseButton : uint8_t {
     Left    = 0,
-    Right   = 1, 
-    Middle  = 2, 
-    Back    = 3, 
-    Forward = 4, 
-    X1      = 5, 
-    X2      = 6 
+    Right   = 1,
+    Middle  = 2,
+    X1      = 3,
+    X2      = 4,
+    Button5 = 5,
+    Button6 = 6,
+    COUNT
 };
 
 enum class Key {
     None = 0,
     A = 1,
-    B,
-    C,
-    D,
-    E,
-    F,
-    G,
-    H,
-    I,
-    J,
-    K,
-    L,
-    M,
-    N,
-    O,
-    P,
-    Q,
-    R,
-    S,
-    T,
-    U,
-    V,
-    W,
-    X,
-    Y,
-    Z,
+    B, C, D, E, F, G, H, I,
+    J, K, L, M, N, O, P, Q,
+    R, S, T, U, V, W, X, Y, Z,
     Num0 = 27,
-    Num1,
-    Num2,
-    Num3,
-    Num4,
-    Num5,
-    Num6,
-    Num7,
-    Num8,
-    Num9,
+    Num1, Num2, Num3,
+    Num4, Num5, Num6,
+    Num7, Num8, Num9,
     F1 = 37,
-    F2,
-    F3,
-    F4,
-    F5,
-    F6,
-    F7,
-    F8,
-    F9,
-    F10,
-    F11,
-    F12,
-    Escape,
-    Tab,
-    CapsLock,
-    Shift,
-    Control,
-    Alt,
-    Space,
-    Enter,
-    Backspace,
-    Delete,
-    Home,
-    End,
-    PageUp,
-    PageDown,
-    ArrowUp,
-    ArrowDown,
-    ArrowLeft,
-    ArrowRight,
-    Insert,
-    PrintScreen,
-    Pause,
+    F2, F3, F4, F5,
+    F6, F7, F8, F9,
+    F10, F11, F12,
+    Escape, Tab, CapsLock,
+    Shift, Control, Alt,
+    Space, Enter, Backspace,
+    Delete, Home, End,
+    PageUp, PageDown, 
+    ArrowUp, ArrowDown, ArrowLeft, ArrowRight,
+    Insert, PrintScreen, Pause,
     NumPad0 = 70,
-    NumPad1,
-    NumPad2,
-    NumPad3,
-    NumPad4,
-    NumPad5,
-    NumPad6,
-    NumPad7,
-    NumPad8,
-    NumPad9,
-    NumPadMultiply,
-    NumPadAdd,
-    NumPadMinus,
-    NumPadDecimal,
+    NumPad1, NumPad2, NumPad3,
+    NumPad4, NumPad5, NumPad6,
+    NumPad7, NumPad8, NumPad9,
+    NumPadMultiply, NumPadAdd,
+    NumPadMinus, NumPadDecimal,
     NumPadDivide
 };
 
 struct MouseInput {
-    Vec2 position;
-    Vec2 delta;
+    Vec2 position{};
+    Vec2 delta{};
     float wheelDelta = 0.0f;
-    bool buttons[5] = {};
-    bool prevButtons[5] = {};
+
+    bool buttons[(int)MouseButton::COUNT]{};
+    bool prevButtons[(int)MouseButton::COUNT]{};
 };
 
 struct KeyboardInput {
@@ -439,7 +457,11 @@ struct Shadow {
     Color color = Color(0, 0, 0, 128);
 };
 
-
+DAKTLIB_DECLARE_FLAGS(TableFlags);
+DAKTLIB_DECLARE_FLAGS(WindowFlags);
+DAKTLIB_DECLARE_FLAGS(InputTextFlags);
+DAKTLIB_DECLARE_FLAGS(SelectableFlags);
+DAKTLIB_DECLARE_FLAGS(TreeNodeFlags);
 
 } // namespace dakt::gui
 

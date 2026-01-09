@@ -2,8 +2,8 @@
 
 #include "dakt/gui/core/Types.hpp"
 
-#include <stack>
 #include <vector>
+#include <memory>
 #include <unordered_map>
 
 namespace dakt::gui {
@@ -23,7 +23,24 @@ namespace dakt::gui {
         Vec2 cursorStartPos;
         WindowFlags flags = WindowFlags::None;
         bool collapsed = false;
-        bool skipItem = false;
+        bool skipItems = false;
+    };
+
+    struct GroupState {
+        Vec2 cursorPosBackup{};
+        Vec2 cursorStartBackup{};
+        Rect lastItemRectBackup{};
+        float indentBackup = 0.0f;
+    };
+
+    struct ChildState {
+        WindowState* parentWindow = nullptr;
+        Vec2 parentCursorBackup{};
+        Vec2 parentCursorStartBackup{};
+        Rect parentLastItemRectBackup{};
+        Vec2 childPos{};
+        Vec2 childSize{};
+        WindowState* childWindow = nullptr;
     };
 
     struct ColorPickerState {
@@ -77,14 +94,26 @@ namespace dakt::gui {
     // Immediate State (owned by Context)
     struct ImmediateState {
         float deltaTime = 0.0f;
+
+        // Frame counter
+        std::uint64_t frameIndex = 0;
         
         // ID stack
         std::vector<ID> idStack;
         ID currentId = 0;
 
-        // Window stack
-        std::stack<WindowState> windowStack;
+        // Persistent window storage (stable pointers)
+        std::unordered_map<ID, std::unique_ptr<WindowState>> windowsById;
+
+        // Pointer-based window stack (no copies)
+        std::vector<WindowState*> windowStack;
         WindowState* currentWindow = nullptr;
+
+        // GroupState stack
+        std::vector<GroupState> groupStack;
+
+        // ChildState stack
+        std::vector<ChildState> childStack;
 
         // Next window hints
         bool nextWindowPosSet = false;
@@ -97,9 +126,13 @@ namespace dakt::gui {
         Rect lastItemRect;
         bool lastItemHovered = false;
         bool lastItemActive = false;
+        bool lastItemClicked = false;
         bool lastItemEdited = false;
         bool lastItemActivated = false;
         bool lastItemDeactivated = false;
+
+        // Mouse state (captured each frame)
+        MouseInput mouse{};
 
         // Hot/Active tracking
         ID hotId = 0;

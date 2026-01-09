@@ -1,37 +1,63 @@
 #include "dakt/gui/immediate/Widgets/Slider.hpp"
-#include "dakt/gui/immediate/ImmediateContext.hpp"
+
+#include "dakt/gui/core/Context.hpp"
 #include "dakt/gui/immediate/Widgets/Text.hpp"
-#include "dakt/gui/immediate/internal/WidgetBase.hpp"
+#include "dakt/gui/subsystems/draw/DrawList.hpp"
+
+#include "dakt/gui/immediate/ImmediateContext.hpp"
+#include "dakt/gui/immediate/internal/ImmediateState.hpp"
+#include "dakt/gui/immediate/internal/ImmediateStateAccess.hpp"
 
 #include <algorithm>
 #include <cstring>
+#include <cstdio>
 
 namespace dakt::gui {
 
+    static bool pointInRect(const Vec2& p, const Rect& r) {
+        return p.x >= r.x && p.y >= r.y && p.x <= (r.x + r.width) && p.y < (r.y + r.height);
+    }
+
     bool sliderFloat(const char* label, float* value, float min, float max, const char* format) {
-        auto w = widgetSetup();
-        if (!w) return false;
+        Context* ctx = getCurrentContext();
+        if (!ctx || !label || !value) return false;
+
+        ImmediateState& s = getState();
+        if (!s.currentWindow) return false;
+        if (s.currentWindow->skipItems) return false;
+
+        WindowState* win = s.currentWindow;
 
         ID id = getID(label);
 
-        Vec2 pos = getCursorPos();
-        Vec2 windowPos = getWindowPos();
-        Vec2 sliderPos = windowPos + pos;
+        const float labelWidth = static_cast<float>(strlen(label)) * 8.0f + 8.0f;
+        const float sliderWidth = 150.0f;
+        const float sliderHeight = 18.0f;
+        const float spacingY = 4.0f;
 
-        float labelWidth = static_cast<float>(strlen(label)) * 8.0f + 8.0f;
-        float sliderWidth = 150.0f;
-        float sliderHeight = 18.0f;
-
-        Vec2 trackPos = Vec2(sliderPos.x + labelWidth, sliderPos.y);
+        Vec2 pos = win->cursorPos;
+        Vec2 trackPos(pos.x + labelWidth, pos.y);
         Rect trackRect(trackPos.x, trackPos.y, sliderWidth, sliderHeight);
+        Rect bb(pos.x, pos.y, labelWidth + sliderWidth, sliderHeight);
 
-        bool hovered = isMouseHoveringRect(trackPos, trackPos + Vec2(sliderWidth, sliderHeight));
-        bool dragging = hovered && isMouseDown(MouseButton::Left);
+        win->cursorPos.x = win->cursorStartPos.x;
+        win->cursorPos.y += sliderHeight + spacingY;
+
+        Vec2 mousePos = getMousePos();
+        bool hovered = pointInRect(mousePos, trackRect);
+
+        if (hovered) s.hotId = id;
+
+        bool active = (s.activeId == id);
         bool changed = false;
 
-        if (dragging) {
-            float mouseX = getMousePos().x;
-            float t = (mouseX - trackPos.x) / sliderWidth;
+        if (hovered && isMouseClicked(MouseButton::Left)) {
+            s.activeId = id;
+            active = true;
+        }
+
+        if (active && isMouseDown(MouseButton::Left)) {
+            float t = (mousePos.x - trackPos.x) / sliderWidth;
             t = std::clamp(t, 0.0f, 1.0f);
             float newValue = min + t * (max - min);
             if (newValue != *value) {
@@ -40,28 +66,38 @@ namespace dakt::gui {
             }
         }
 
-        w.dl->drawText(sliderPos, label, w.colors->textPrimary);
+        if (isMouseReleased(MouseButton::Left) && s.activeId == id) {
+            s.activeId = 0;
+            active = false;
+        }
 
-        w.dl->drawRectFilledRounded(trackRect, w.colors->surface, 2.0f);
+        s.lastItemId = id;
+        s.lastItemRect = bb;
+        s.lastItemHovered = hovered;
+        s.lastItemActive = active;
+        s.lastItemClicked = changed;
 
-        float t = (*value - min) / (max - min);
-        float fillWidth = sliderWidth * t;
-        Rect fillRect(trackPos.x, trackPos.y, fillWidth, sliderHeight);
-        w.dl->drawRectFilledRounded(fillRect, w.colors->primary, 2.0f);
+        DrawList* dl = getWindowDrawList();
+        if (dl) {
+            dl->drawText(pos, label, Color::fromFloats(1.0f, 1.0f, 1.0f, 1.0f));
 
-        w.dl->drawRectRounded(trackRect, w.colors->border, 2.0f);
+            Color trackColor = Color::fromFloats(0.20f, 0.20f, 0.20f, 1.0f);
+            dl->drawRectFilledRounded(trackRect, trackColor, 2.0f);
 
-        char valueBuf[64];
-        snprintf(valueBuf, sizeof(valueBuf), format, *value);
-        float valueWidth = static_cast<float>(strlen(valueBuf)) * 8.0f;
-        Vec2 valuePos = trackPos + Vec2((sliderWidth - valueWidth) * 0.5f, 1);
-        w.dl->drawText(valuePos, valueBuf, w.colors->textPrimary);
+            float t = (*value - min) / (max - min);
+            float fillWidth = sliderWidth * t;
+            Rect fillRect(trackPos.x, trackPos.y, fillWidth, sliderHeight);
+            Color fillColor = Color::fromFloats(0.30f, 0.50f, 0.80f, 1.0f);
+            dl->drawRectFilledRounded(fillRect, fillColor, 2.0f);
 
-        w.state->lastItemRect = trackRect;
-        w.state->lastItemEdited = changed;
-        updateItemState(id, hovered, dragging);
+            dl->drawRectRounded(trackRect, Color::fromFloats(0.30f, 0.30f, 0.30f, 1.0f), 2.0f);
 
-        setCursorPos(Vec2(pos.x, pos.y + sliderHeight + 4.0f));
+            char valueBuf[64];
+            snprintf(valueBuf, sizeof(valueBuf), format, *value);
+            float valueWidth = static_cast<float>(strlen(valueBuf)) * 8.0f;
+            Vec2 valuePos(trackPos.x + (sliderWidth - valueWidth) * 0.5f, trackPos.y + 1);
+            dl->drawText(valuePos, valueBuf, Color::fromFloats(1.0f, 1.0f, 1.0f, 1.0f));
+        }
 
         return changed;
     }
@@ -81,13 +117,14 @@ namespace dakt::gui {
         bool changed = false;
         changed |= sliderFloat("X", &value->x, min, max, format);
         changed |= sliderFloat("Y", &value->y, min, max, format);
+        popID();
         return changed;
     }
 
     bool dragInt(const char* label, int* value, float speed, int min, int max) {
         return sliderInt(
             label,
-            value, 
+            value,
             min == 0 && max == 0 ? -1000 : min,
             max == 0 ? 1000 : max
         );
@@ -97,8 +134,8 @@ namespace dakt::gui {
         return sliderFloat(
             label,
             value,
-            min == 0 && max == 0 ? -1000.0f : min,
-            max == 0 ? 1000.0f : max,
+            min == 0.0f && max == 0.0f ? -1000.0f : min,
+            max == 0.0f ? 1000.0f : max,
             format
         );
     }

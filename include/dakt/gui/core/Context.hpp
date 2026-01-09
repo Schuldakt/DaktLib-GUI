@@ -4,7 +4,6 @@
 #include "../subsystems/style/Style.hpp"
 #include "Types.hpp"
 #include <memory>
-#include <vector>
 
 namespace dakt::gui {
 
@@ -30,6 +29,21 @@ class Context {
     Theme& getTheme() { return theme_; }
     const Theme& getTheme() const { return theme_; }
 
+    // Input
+    void setMouseInput(const MouseInput& input);
+
+    void setKeyboardInput(const KeyboardInput& input);
+    const KeyboardInput& getKeyboardInput() const;
+
+    // Input helpers
+    void beginInputFrame();
+    void setMousePosition(const Vec2& pos);
+    void setMouseDelta(const Vec2& delta);
+    void addMouseWheelDelta(float wheelDelta);
+    void setMouseButton(MouseButton button, bool down);
+
+    const MouseInput& getMouseInput() const;
+
     // Layout & rendering
     DrawList& getDrawList();
     LayoutNode* getRootLayout();
@@ -46,6 +60,10 @@ class Context {
     std::unique_ptr<DrawList> drawList_;
     std::unique_ptr<LayoutNode> rootLayout_;
     std::unique_ptr<ImmediateState> immediateState_;
+
+    // Input state (updated by platform/app)
+    MouseInput mouseInput_{};
+    KeyboardInput keyboardInput_{};
 };
 
 } // namespace dakt::gui

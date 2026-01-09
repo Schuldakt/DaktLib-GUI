@@ -1,113 +1,226 @@
 #include "dakt/gui/immediate/Widgets/Button.hpp"
+
+#include "dakt/gui/core/Context.hpp"
+#include "dakt/gui/subsystems/draw/DrawList.hpp"
+
 #include "dakt/gui/immediate/ImmediateContext.hpp"
-#include "dakt/gui/immediate/internal/WidgetBase.hpp"
+#include "dakt/gui/immediate/internal/ImmediateState.hpp"
+#include "dakt/gui/immediate/internal/ImmediateStateAccess.hpp"
 
 #include <cstring>  // for strlen
 
 namespace dakt::gui {
 
+    static bool pointInRect(const Vec2& p, const Rect& r) {
+        return p.x >= r.x && p.y >= r.y && p.x <= (r.x + r.width) && p.y < (r.y + r.height);
+    }
+
+    // Temporary text size approximation.
+    // If you already have a text-size function elsewhere, us it instead.
+    static Vec2 calcTextSize(const char* text) {
+        float w = 0.0f;
+        float h = 16.0f;
+        if (!text) return Vec2(0, h);
+
+        for (const char* c = text; *c; ++c) {
+            w += 8.0f;
+        }
+        return Vec2(w, h);
+    }
+
     bool button(const char* label, Vec2 size) {
-        auto w = widgetSetup();
-        if (!w) return false;
+        Context* ctx = getCurrentContext();
+        if (!ctx || !label) return false;
 
-        const WidgetStyle& style = w.ctx->getTheme().getButtonStyle();
+        ImmediateState& s = getState();
+        if (!s.currentWindow) return false;
+        if (s.currentWindow->skipItems) return false;
 
+        WindowState* win = s.currentWindow;
+
+        // ID
         ID id = getID(label);
 
-        Vec2 cursorPos = getCursorPos();
-        Vec2 windowPos = getWindowPos();
-        Vec2 buttonPos = windowPos + cursorPos;
+        // Layout
+        const float paddingX = 10.0f;
+        const float paddingY = 6.0f;
+        const float spacingY = 8.0f;
 
-        float labelWidth = static_cast<float>(strlen(label)) * 8.0f;
+        Vec2 textSize = calcTextSize(label);
 
-        Vec2 buttonSize = size;
-        if (buttonSize.x <= 0)
-            buttonSize.x = labelWidth + 16.0f;
-        if (buttonSize.y <= 0)
-            buttonSize.y = 24.0f;
+        Vec2 finalSize = size;
+        if (finalSize.x <= 0.0f) finalSize.x = textSize.x + paddingX * 2.0f;
+        if (finalSize.y <= 0.0f) finalSize.y = textSize.y + paddingY * 2.0f;
 
-        Rect buttonRect(buttonPos.x, buttonPos.y, buttonSize.x, buttonSize.y);
+        Vec2 pos = win->cursorPos;
+        Rect bb(pos.x, pos.y, finalSize.x, finalSize.y);
 
-        bool hovered = isMouseHoveringRect(buttonPos, buttonPos + buttonSize);
-        bool held = hovered && isMouseDown(MouseButton::Left);
-        bool clicked = hovered && isMouseReleased(MouseButton::Left);
+        // Advance cursor (default vertical stacking)
+        win->cursorPos.x = win->cursorStartPos.x;
+        win->cursorPos.y += finalSize.y + spacingY;
 
-        Color bgColor = style.backgroundColor;
-        if (held) {
-            bgColor = style.backgroundColorActive;
-        } else if (hovered) {
-            bgColor = style.backgroundColorHover;
+        // Interaction
+        Vec2 mousePos = getMousePos();
+        bool hovered = pointInRect(mousePos, bb);
+
+        if (hovered) {
+            s.hotId = id;
         }
 
-        w.dl->drawRectFilledRounded(buttonRect, bgColor, 4.0f);
-        w.dl->drawRectRounded(buttonRect, w.colors->border, 4.0f);
+        // Determine active field name.
+        bool active = (s.activeId == id);
+        bool clicked = false;
 
-        Vec2 textPos = Vec2(buttonPos.x + (buttonSize.x - labelWidth) * 0.5f, buttonPos.y + (buttonSize.y - 16.0f) * 0.5f);
-        w.dl->drawText(textPos, label, w.colors->textPrimary);
+        if (hovered && isMouseClicked(MouseButton::Left)) {
+            s.activeId = id;
+            active = true;
+        }
 
-        w.state->lastItemRect = buttonRect;
-        updateItemState(id, hovered, held);
+        if (isMouseReleased(MouseButton::Left) && s.activeId == id) {
+            if (hovered) {
+                clicked = true;
+            }
+            s.activeId = 0;
+            active = false;
+        }
 
-        setCursorPos(Vec2(cursorPos.x, cursorPos.y + buttonSize.y + 4.0f));
+        // Update last-item info (required for item queries + sameLine())
+        s.lastItemId = id;
+        s.lastItemRect = bb;
+        s.lastItemHovered = hovered;
+        s.lastItemActive = active;
+        s.lastItemClicked = clicked;
+
+        // Draw
+        DrawList* dl = getWindowDrawList();
+        if (dl) {
+            Color bg = Color::fromFloats(0.20f, 0.20f, 0.20f, 1.0f);
+            if (hovered) bg = Color::fromFloats(0.25f, 0.25f, 0.25f, 1.0f);
+            if (active) bg = Color::fromFloats(0.18f, 0.18f, 0.18f, 1.0f);
+
+            Color border = Color::fromFloats(0.30f, 0.30f, 0.30f, 1.0f);
+            Color text = Color::fromFloats(1.0f, 1.0f, 1.0f, 1.0f);
+
+            dl->drawRectFilledRounded(bb, bg, 4.0f);
+            dl->drawRectFilledRounded(bb, border, 4.0f);
+
+            Vec2 textPos(bb.x + paddingX, bb.y + paddingY);
+            dl->drawText(textPos, label, text);
+        }
 
         return clicked;
     }
 
     bool smallButton(const char* label) {
-        return button(label, Vec2(0, 20));
+        return button(label, Vec2(0, 0));
     }
 
-    bool invisibleButton(const char* strId, Vec2 size) {
-        auto w = widgetSetup();
-        if (!w) return false;
+    bool invisibleButton(const char* idStr, Vec2 size) {
+    if (!idStr) return false;
 
-        ID id = getID(strId);
+    ImmediateState& s = getState();
+    if (!s.currentWindow) return false;
+    if (s.currentWindow->skipItems) return false;
 
-        Vec2 cursorPos = getCursorPos();
-        Vec2 windowPos = getWindowPos();
-        Vec2 buttonPos = windowPos + cursorPos;
+    WindowState* win = s.currentWindow;
 
-        bool hovered = isMouseHoveringRect(buttonPos, buttonPos + size);
-        bool held = hovered && isMouseDown(MouseButton::Left);
-        bool clicked = hovered && isMouseReleased(MouseButton::Left);
+    ID id = getID(idStr);
 
-        w.state->lastItemRect = Rect(buttonPos.x, buttonPos.y, size.x, size.y);
-        updateItemState(id, hovered, held);
+    const float spacingY = 8.0f;
 
-        setCursorPos(Vec2(cursorPos.x, cursorPos.y + size.y + 4.0f));
+    Vec2 finalSize = size;
+    if (finalSize.x <= 0.0f) finalSize.x = 10.0f;
+    if (finalSize.y <= 0.0f) finalSize.y = 10.0f;
 
-        return clicked;
+    Vec2 pos = win->cursorPos;
+    Rect bb(pos.x, pos.y, finalSize.x, finalSize.y);
+
+    win->cursorPos.x = win->cursorStartPos.x;
+    win->cursorPos.y += finalSize.y + spacingY;
+
+    Vec2 mousePos = getMousePos();
+    bool hovered = pointInRect(mousePos, bb);
+
+    if (hovered) s.hotId = id;
+
+    bool active = (s.activeId == id);
+    bool clicked = false;
+
+    if (hovered && isMouseClicked(MouseButton::Left)) {
+        s.activeId = id;
+        active = true;
     }
 
-    bool colorButton(const char* descId, Color color, Vec2 size) {
-        auto w = widgetSetup();
-        if (!w) return false;
-
-        ID id = getID(descId);
-
-        Vec2 pos = getCursorPos();
-        Vec2 windowPos = getWindowPos();
-        Vec2 buttonPos = windowPos + pos;
-
-        Vec2 buttonSize = size;
-        if (buttonSize.x <= 0)
-            buttonSize.x = 24.0f;
-        if (buttonSize.y <= 0)
-            buttonSize.y = 24.0f;
-
-        Rect buttonRect(buttonPos.x, buttonPos.y, buttonSize.x, buttonSize.y);
-
-        bool hovered = isMouseHoveringRect(buttonPos, buttonPos + buttonSize);
-        bool clicked = hovered && isMouseReleased(MouseButton::Left);
-
-        w.dl->drawRectFilledRounded(buttonRect, color, 2.0f);
-        w.dl->drawRectRounded(buttonRect, w.colors->border, 2.0f);
-
-        w.state->lastItemRect = buttonRect;
-        updateItemState(id, hovered, hovered && isMouseDown(MouseButton::Left));
-
-        setCursorPos(Vec2(pos.x, pos.y + buttonSize.y + 4.0f));
-
-        return clicked;
+    if (isMouseReleased(MouseButton::Left) && s.activeId == id) {
+        if (hovered) clicked = true;
+        s.activeId = 0;
+        active = false;
     }
+
+    s.lastItemId = id;
+    s.lastItemRect = bb;
+    s.lastItemHovered = hovered;
+    s.lastItemActive  = active;
+    s.lastItemClicked = clicked;
+
+    return clicked;
+}
+
+bool colorButton(const char* idStr, Color color, Vec2 size) {
+    if (!idStr) return false;
+
+    ImmediateState& s = getState();
+    if (!s.currentWindow) return false;
+    if (s.currentWindow->skipItems) return false;
+
+    WindowState* win = s.currentWindow;
+
+    ID id = getID(idStr);
+
+    const float spacingY = 8.0f;
+
+    Vec2 finalSize = size;
+    if (finalSize.x <= 0.0f) finalSize.x = 20.0f;
+    if (finalSize.y <= 0.0f) finalSize.y = 20.0f;
+
+    Vec2 pos = win->cursorPos;
+    Rect bb(pos.x, pos.y, finalSize.x, finalSize.y);
+
+    win->cursorPos.x = win->cursorStartPos.x;
+    win->cursorPos.y += finalSize.y + spacingY;
+
+    Vec2 mousePos = getMousePos();
+    bool hovered = pointInRect(mousePos, bb);
+
+    if (hovered) s.hotId = id;
+
+    bool active = (s.activeId == id);
+    bool clicked = false;
+
+    if (hovered && isMouseClicked(MouseButton::Left)) {
+        s.activeId = id;
+        active = true;
+    }
+
+    if (isMouseReleased(MouseButton::Left) && s.activeId == id) {
+        if (hovered) clicked = true;
+        s.activeId = 0;
+        active = false;
+    }
+
+    s.lastItemId = id;
+    s.lastItemRect = bb;
+    s.lastItemHovered = hovered;
+    s.lastItemActive  = active;
+    s.lastItemClicked = clicked;
+
+    DrawList* dl = getWindowDrawList();
+    if (dl) {
+        dl->drawRectFilledRounded(bb, color, 3.0f);
+        dl->drawRectRounded(bb, Color::fromFloats(0.30f, 0.30f, 0.30f, 1.0f), 3.0f);
+    }
+
+    return clicked;
+    }
+
 } // namespace dakt::gui

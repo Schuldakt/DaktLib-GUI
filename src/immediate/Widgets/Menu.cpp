@@ -1,22 +1,26 @@
 #include "dakt/gui/immediate/Widgets/Menu.hpp"
+
+#include "dakt/gui/core/Context.hpp"
+#include "dakt/gui/subsystems/draw/DrawList.hpp"
+
 #include "dakt/gui/immediate/ImmediateContext.hpp"
-#include "dakt/gui/immediate/internal/WidgetBase.hpp"
+#include "dakt/gui/immediate/internal/ImmediateState.hpp"
+#include "dakt/gui/immediate/internal/ImmediateStateAccess.hpp"
 
 #include <cstring>
 
 namespace dakt::gui {
 
+    static bool pointInRect(const Vec2& p, const Rect& r) {
+        return p.x >= r.x && p.y >= r.y && p.x <= (r.x + r.width) && p.y < (r.y + r.height);
+    }
+
     bool beginMainMenuBar() {
-        auto w = widgetSetup();
-        if (!w) return false;
+        Context* ctx = getCurrentContext();
+        if (!ctx) return false;
 
-        MenuState& menu = w.state->menuState;
-
-        float screenWidth = 1280.0f; // Default screen width
-        Rect barRect(0, 0, screenWidth, menu.menuBarHeight);
-
-        w.dl->drawRectFilled(barRect, w.colors->surface);
-        w.dl->drawLine(Vec2(0, menu.menuBarHeight), Vec2(screenWidth, menu.menuBarHeight), w.colors->border);
+        ImmediateState& s = getState();
+        MenuState& menu = s.menuState;
 
         menu.mainMenuBarOpen = true;
         menu.menuPosition = Vec2(8, 0);
@@ -26,54 +30,38 @@ namespace dakt::gui {
     }
 
     void endMainMenuBar() {
-        MenuState& menu = getState().menuState;
+        ImmediateState& s = getState();
+        MenuState& menu = s.menuState;
         menu.mainMenuBarOpen = false;
     }
 
     bool beginMenuBar() {
-        auto w = widgetSetup();
-        if (!w || !w.state->currentWindow)
-            return false;
+        Context* ctx = getCurrentContext();
+        if (!ctx) return false;
 
-        MenuState& menu = w.state->menuState;
+        ImmediateState& s = getState();
+        if (!s.currentWindow) return false;
+
+        MenuState& menu = s.menuState;
         menu.menuBarOpen = true;
-        menu.menuPosition = getWindowPos();
+        menu.menuPosition = Vec2(0, 0);  // Simplified
         return true;
     }
 
     void endMenuBar() {
-        MenuState& menu = getState().menuState;
+        ImmediateState& s = getState();
+        MenuState& menu = s.menuState;
         menu.menuBarOpen = false;
     }
 
     bool beginMenu(const char* label, bool enabled) {
-        auto w = widgetSetup();
-        if (!w) return false;
-        if (!enabled) return false;
+        Context* ctx = getCurrentContext();
+        if (!ctx || !label || !enabled) return false;
 
-        MenuState& menu = w.state->menuState;
+        ImmediateState& s = getState();
+        MenuState& menu = s.menuState;
 
-        float labelWidth = static_cast<float>(strlen(label)) * 8.0f + 16.0f;
-        Rect menuRect(menu.menuPosition.x, menu.menuPosition.y, labelWidth, menu.menuBarHeight);
-
-        bool hovered = w.state->input && menuRect.contains(w.state->input->getMousePosition());
-        bool clicked = hovered && w.state->input && w.state->input->isMouseButtonPressed(MouseButton::Left);
-
-        // Draw menu title
-        if (hovered) {
-            w.dl->drawRectFilled(menuRect, w.colors->surfaceVariant);
-        }
-
-        w.dl->drawText(Vec2(menuRect.x + 8, menuRect.y + (menu.menuBarHeight - 14) / 2), label, w.colors->textPrimary);
-
-        menu.menuPosition.x += labelWidth;
-
-        if (clicked) {
-            menu.menuStack.push_back(label);
-            return true;
-        }
-
-        // Check if this menu is already open
+        // Simplified menu - just track if open
         if (!menu.menuStack.empty() && strcmp(menu.menuStack.back(), label) == 0) {
             return true;
         }
@@ -82,47 +70,79 @@ namespace dakt::gui {
     }
 
     void endMenu() {
-        MenuState& menu = getState().menuState;
+        ImmediateState& s = getState();
+        MenuState& menu = s.menuState;
         if (!menu.menuStack.empty()) {
             menu.menuStack.pop_back();
         }
     }
 
     bool menuItem(const char* label, const char* shortcut, bool selected, bool enabled) {
-        auto w = widgetSetup();
-        if (!w) return false;
+        Context* ctx = getCurrentContext();
+        if (!ctx || !label) return false;
 
-        Vec2 pos = getCursorPos();
-        Vec2 windowPos = getWindowPos();
+        ImmediateState& s = getState();
+        if (!s.currentWindow) return false;
+        if (s.currentWindow->skipItems) return false;
 
-        float itemHeight = 24.0f;
-        float itemWidth = 200.0f;
-        Rect itemRect(windowPos.x + pos.x, windowPos.y + pos.y, itemWidth, itemHeight);
+        WindowState* win = s.currentWindow;
 
-        bool hovered = enabled && w.state->input && itemRect.contains(w.state->input->getMousePosition());
-        bool clicked = hovered && w.state->input && w.state->input->isMouseButtonPressed(MouseButton::Left);
+        ID id = getID(label);
 
-        // Draw background
-        if (hovered) {
-            w.dl->drawRectFilled(itemRect, w.colors->surfaceVariant);
+        const float itemHeight = 24.0f;
+        const float itemWidth = 200.0f;
+
+        Vec2 pos = win->cursorPos;
+        Rect bb(pos.x, pos.y, itemWidth, itemHeight);
+
+        win->cursorPos.x = win->cursorStartPos.x;
+        win->cursorPos.y += itemHeight;
+
+        Vec2 mousePos = getMousePos();
+        bool hovered = enabled && pointInRect(mousePos, bb);
+
+        if (hovered) s.hotId = id;
+
+        bool active = (s.activeId == id);
+        bool clicked = false;
+
+        if (hovered && isMouseClicked(MouseButton::Left)) {
+            s.activeId = id;
+            active = true;
         }
 
-        // Draw checkmark if selected
-        if (selected) {
-            w.dl->drawText(Vec2(itemRect.x + 4, itemRect.y + 4), "√", w.colors->textPrimary);
+        if (isMouseReleased(MouseButton::Left) && s.activeId == id) {
+            if (hovered) {
+                clicked = true;
+            }
+            s.activeId = 0;
+            active = false;
         }
 
-        // Draw label
-        Color textColor = enabled ? w.colors->textPrimary : w.colors->textDisabled;
-        w.dl->drawText(Vec2(itemRect.x + 24, itemRect.y + 4), label, textColor);
+        s.lastItemId = id;
+        s.lastItemRect = bb;
+        s.lastItemHovered = hovered;
+        s.lastItemActive = active;
+        s.lastItemClicked = clicked;
 
-        // Draw shortcut
-        if (shortcut) {
-            float shortcutWidth = static_cast<float>(strlen(shortcut)) * 7.0f;
-            w.dl->drawText(Vec2(itemRect.x + itemWidth - shortcutWidth - 8, itemRect.y + 4), shortcut, w.colors->textSecondary);
+        DrawList* dl = getWindowDrawList();
+        if (dl) {
+            if (hovered) {
+                dl->drawRectFilled(bb, Color::fromFloats(0.25f, 0.25f, 0.25f, 1.0f));
+            }
+
+            if (selected) {
+                dl->drawText(Vec2(pos.x + 4, pos.y + 4), "√", Color::fromFloats(1.0f, 1.0f, 1.0f, 1.0f));
+            }
+
+            Color textColor = enabled ? Color::fromFloats(1.0f, 1.0f, 1.0f, 1.0f) : Color::fromFloats(0.5f, 0.5f, 0.5f, 1.0f);
+            dl->drawText(Vec2(pos.x + 24, pos.y + 4), label, textColor);
+
+            if (shortcut) {
+                float shortcutWidth = static_cast<float>(strlen(shortcut)) * 7.0f;
+                dl->drawText(Vec2(pos.x + itemWidth - shortcutWidth - 8, pos.y + 4), shortcut, Color::fromFloats(0.7f, 0.7f, 0.7f, 1.0f));
+            }
         }
-
-        setCursorPos(Vec2(pos.x, pos.y + itemHeight));
 
         return clicked;
     }
